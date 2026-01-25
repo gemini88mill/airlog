@@ -30,7 +30,6 @@ export const Login = () => {
       alignItems: 'center',
       minHeight: '100vh',
       color: 'black',
-      // backgroundColor: '#f5f5f5',
     }}>
       <div style={{
         backgroundColor: 'white',
