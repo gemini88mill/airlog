@@ -1,22 +1,116 @@
 import { flightsRoutes } from "./routes/flights";
 import { circlesRoutes } from "./routes/circles";
+import { authRoutes } from "./routes/auth";
+
+const ALLOWED_ORIGINS = [
+  "http://localhost:5137",
+  "http://localhost:5173",
+  "http://localhost:3000",
+];
+
+const addCorsHeaders = (response: Response, origin: string | null): Response => {
+  const headers = new Headers(response.headers);
+  
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    headers.set("Access-Control-Allow-Origin", origin);
+    headers.set("Access-Control-Allow-Credentials", "true");
+  }
+  
+  headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  headers.set("Access-Control-Max-Age", "86400");
+
+  // Create a new response with CORS headers and the original body
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+};
+
+const allRoutes: Record<string, (req: Request | any) => Response | Promise<Response>> = {
+  "/": () => new Response("Welcome to Bun!"),
+  "/abc": () => Response.redirect("/source", 301),
+  "/source": () => new Response(Bun.file(import.meta.path)),
+  "/api": () => Response.json({ some: "buns", for: "you" }),
+  "/api/post": async (req: Request) => {
+    const data = await req.json();
+    console.log("Received JSON:", data);
+    return Response.json({ success: true, data });
+  },
+  ...authRoutes,
+  ...circlesRoutes,
+  ...flightsRoutes,
+};
 
 const server = Bun.serve({
-  routes: {
-    "/": () => new Response("Welcome to Bun!"),
-    "/abc": () => Response.redirect("/source", 301),
-    "/source": () => new Response(Bun.file(import.meta.path)),
-    "/api": () => Response.json({ some: "buns", for: "you" }),
-    "/api/post": async (req) => {
-      const data = await req.json();
-      console.log("Received JSON:", data);
-      return Response.json({ success: true, data });
-    },
-    ...circlesRoutes,
-    ...flightsRoutes,
-  },
   fetch: async (req) => {
-    return Response.json({ error: "Not found" }, { status: 404 });
+    const origin = req.headers.get("Origin");
+    const url = new URL(req.url);
+
+    // Handle preflight OPTIONS requests
+    if (req.method === "OPTIONS") {
+      const headers = new Headers();
+      if (origin && ALLOWED_ORIGINS.includes(origin)) {
+        headers.set("Access-Control-Allow-Origin", origin);
+        headers.set("Access-Control-Allow-Credentials", "true");
+      }
+      headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+      headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+      headers.set("Access-Control-Max-Age", "86400");
+      return new Response(null, { status: 204, headers });
+    }
+
+    // Check exact route match first
+    const exactHandler = allRoutes[url.pathname];
+    if (exactHandler) {
+      try {
+        const response = await exactHandler(req);
+        return addCorsHeaders(response, origin);
+      } catch (error) {
+        const errorResponse = Response.json(
+          { error: "Internal server error" },
+          { status: 500 }
+        );
+        return addCorsHeaders(errorResponse, origin);
+      }
+    }
+
+    // Handle parameterized routes (e.g., /v1/circles/:circleId/members)
+    for (const [routePath, handler] of Object.entries(allRoutes)) {
+      if (routePath.includes(":")) {
+        // Convert route pattern to regex (e.g., /v1/circles/:circleId/members -> /v1/circles/([^/]+)/members)
+        const routePattern = "^" + routePath.replace(/:[^/]+/g, "([^/]+)") + "$";
+        const regex = new RegExp(routePattern);
+        const match = url.pathname.match(regex);
+        
+        if (match) {
+          // Extract params and create BunRequest-like object
+          const paramNames = routePath.match(/:[^/]+/g)?.map(name => name.substring(1)) || [];
+          const params: Record<string, string> = {};
+          paramNames.forEach((name, index) => {
+            params[name] = match[index + 1] || "";
+          });
+
+          // Create a request-like object with params (for BunRequest compatibility)
+          const reqWithParams = Object.assign(req, { params, cookies: {} });
+          
+          try {
+            const response = await handler(reqWithParams);
+            return addCorsHeaders(response, origin);
+          } catch (error) {
+            const errorResponse = Response.json(
+              { error: "Internal server error" },
+              { status: 500 }
+            );
+            return addCorsHeaders(errorResponse, origin);
+          }
+        }
+      }
+    }
+
+    const notFoundResponse = Response.json({ error: "Not found" }, { status: 404 });
+    return addCorsHeaders(notFoundResponse, origin);
   },
 });
 
