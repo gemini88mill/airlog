@@ -4,7 +4,9 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "serve": "bun run server.ts"
+    "serve": "bun run server.ts",
+    "dev": "bun --watch server.ts",
+    "start": "bun run server.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"

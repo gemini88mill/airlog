@@ -1,6 +1,7 @@
 import { flightsRoutes } from "./routes/flights";
 import { circlesRoutes } from "./routes/circles";
 import { authRoutes } from "./routes/auth";
+import { bootstrapRoutes } from "./routes/bootstrap";
 
 const ALLOWED_ORIGINS = [
   "http://localhost:5137",
@@ -39,6 +40,7 @@ const allRoutes: Record<string, (req: Request | any) => Response | Promise<Respo
     return Response.json({ success: true, data });
   },
   ...authRoutes,
+  ...bootstrapRoutes,
   ...circlesRoutes,
   ...flightsRoutes,
 };
