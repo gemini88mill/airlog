@@ -25,18 +25,18 @@ export const DashboardHeader = ({
   const [isCircleDropdownOpen, setIsCircleDropdownOpen] = useState(false);
 
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+    <header className="bg-primary-500 border-b border-primary-600 px-6 py-4 flex items-center justify-between">
       <div className="flex items-center gap-6">
-        <h1 className="text-2xl font-bold text-gray-900">Airlog</h1>
+        <h1 className="text-2xl font-bold text-white">Airlog</h1>
         <div className="relative">
           <button
             onClick={() => setIsCircleDropdownOpen(!isCircleDropdownOpen)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors"
           >
-            <span className="font-medium text-gray-900">
+            <span className="font-medium text-white">
               {activeCircle?.name || 'Select Circle'}
             </span>
-            <span className="text-gray-500">▾</span>
+            <span className="text-primary-100">▾</span>
           </button>
           {isCircleDropdownOpen && (
             <>
@@ -53,8 +53,8 @@ export const DashboardHeader = ({
                       setIsCircleDropdownOpen(false);
                     }}
                     className={`
-                      w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors
-                      ${activeCircleId === circle.id ? 'bg-blue-50 font-medium' : ''}
+                      w-full text-left px-4 py-2 hover:bg-primary-50 transition-colors
+                      ${activeCircleId === circle.id ? 'bg-primary-100 text-primary-900 font-medium' : 'text-gray-900'}
                     `}
                   >
                     {circle.name}
@@ -67,7 +67,7 @@ export const DashboardHeader = ({
       </div>
       <button
         onClick={onProfileClick}
-        className="px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-700"
+        className="px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors text-white"
       >
         {displayName ? `(${displayName})` : '(Profile)'}
       </button>

@@ -70,7 +70,7 @@ export const Timeline = ({ flights, circles, activeCircleId, onScopeChange, load
             className={`
               px-4 py-2 rounded-lg transition-colors
               ${activeScope === 'mine' 
-                ? 'bg-blue-600 text-white font-medium' 
+                ? 'bg-primary-500 text-white font-medium' 
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }
             `}
@@ -101,7 +101,7 @@ export const Timeline = ({ flights, circles, activeCircleId, onScopeChange, load
               className={`
                 px-4 py-2 rounded-lg transition-colors flex items-center gap-2
                 ${activeScope === 'circle' 
-                  ? 'bg-blue-600 text-white font-medium' 
+                  ? 'bg-primary-500 text-white font-medium' 
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }
               `}

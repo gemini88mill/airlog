@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Telex', system-ui, -apple-system, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -13,6 +13,31 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Primary color palette based on #2F5B8F */
+  --color-primary-50: #e8edf5;
+  --color-primary-100: #d1dceb;
+  --color-primary-200: #a3b9d7;
+  --color-primary-300: #7596c3;
+  --color-primary-400: #4773af;
+  --color-primary-500: #2F5B8F;
+  --color-primary-600: #264973;
+  --color-primary-700: #1c3757;
+  --color-primary-800: #13253b;
+  --color-primary-900: #09131f;
+}
+
+@theme {
+  --color-primary-50: #e8edf5;
+  --color-primary-100: #d1dceb;
+  --color-primary-200: #a3b9d7;
+  --color-primary-300: #7596c3;
+  --color-primary-400: #4773af;
+  --color-primary-500: #2F5B8F;
+  --color-primary-600: #264973;
+  --color-primary-700: #1c3757;
+  --color-primary-800: #13253b;
+  --color-primary-900: #09131f;
 }
 
 a {

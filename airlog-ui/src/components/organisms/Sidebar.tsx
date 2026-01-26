@@ -22,7 +22,7 @@ export const Sidebar = ({ activeView = 'timeline', onViewChange }: SidebarProps)
             className={`
               w-full text-left px-4 py-2 rounded-lg transition-colors
               ${activeView === item.id 
-                ? 'bg-blue-100 text-blue-900 font-medium' 
+                ? 'bg-primary-100 text-primary-900 font-medium' 
                 : 'text-gray-700 hover:bg-gray-100'
               }
               ${item.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
