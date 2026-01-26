@@ -94,7 +94,7 @@ export const Dashboard = ({ bootstrapData, onLogout }: DashboardProps) => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-full bg-gray-50">
       <DashboardHeader
         circles={bootstrapData.circles}
         activeCircleId={activeCircleId}
