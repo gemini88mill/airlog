@@ -16,7 +16,7 @@ type TimelineProps = {
   flights: Flight[];
   circles: Array<{ id: string; name: string }>;
   activeCircleId: string | null;
-  onScopeChange?: (scope: string, circleId?: string | null) => void;
+  onScopeChange?: (scope: 'mine' | 'shared' | 'circle', circleId?: string | null) => void;
   loading?: boolean;
 };
 
