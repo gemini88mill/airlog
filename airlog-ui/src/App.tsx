@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { auth } from './lib/auth';
 import { apiClient } from './lib/apiClient';
 import { Login } from './components/Login';
+import { Dashboard } from './components/Dashboard';
 import './App.css';
 
 type User = {
@@ -83,13 +84,8 @@ export const App = () => {
 
   if (loading || (user && bootstrapLoading)) {
     return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh',
-      }}>
-        <p>Loading...</p>
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-gray-600">Loading...</p>
       </div>
     );
   }
@@ -98,59 +94,14 @@ export const App = () => {
     return <Login />;
   }
 
-  const displayName = bootstrapData?.user.displayName || user.email || 'User';
+  if (!bootstrapData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-gray-600">Loading user data...</p>
+      </div>
+    );
+  }
 
-  return (
-    <div style={{ padding: '2rem' }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '2rem',
-      }}>
-        <h1>Airlog</h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <span>Welcome, {displayName}</span>
-          <button
-            onClick={handleLogout}
-            style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: '#dc3545',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            Logout
-          </button>
-        </div>
-      </div>
-      <div>
-        {bootstrapData ? (
-          <div>
-            <p>You are now logged in and have access to the airlog-api.</p>
-            {bootstrapData.circles.length > 0 && (
-              <div style={{ marginTop: '1rem' }}>
-                <h2>Your Circles</h2>
-                <ul>
-                  {bootstrapData.circles.map((circle) => (
-                    <li key={circle.id}>
-                      {circle.name} ({circle.role}) - {circle.members.length} member(s)
-                    </li>
-                  ))}
-                </ul>
-                {bootstrapData.defaults.activeCircleId && (
-                  <p>Active Circle: {bootstrapData.circles.find(c => c.id === bootstrapData.defaults.activeCircleId)?.name}</p>
-                )}
-              </div>
-            )}
-          </div>
-        ) : (
-          <p>Loading user data...</p>
-        )}
-      </div>
-    </div>
-  );
+  return <Dashboard bootstrapData={bootstrapData} onLogout={handleLogout} />;
 };
 
