@@ -17,10 +17,11 @@ type TimelineProps = {
   circles: Array<{ id: string; name: string }>;
   activeCircleId: string | null;
   onScopeChange?: (scope: 'mine' | 'shared' | 'circle', circleId?: string | null) => void;
+  onAddFlight?: () => void;
   loading?: boolean;
 };
 
-export const Timeline = ({ flights, circles, activeCircleId, onScopeChange, loading = false }: TimelineProps) => {
+export const Timeline = ({ flights, circles, activeCircleId, onScopeChange, onAddFlight, loading = false }: TimelineProps) => {
   const [activeScope, setActiveScope] = useState<'mine' | 'shared' | 'circle'>('mine');
   const [selectedCircleId, setSelectedCircleId] = useState<string | null>(activeCircleId);
   const [isCircleDropdownOpen, setIsCircleDropdownOpen] = useState(false);
@@ -189,6 +190,16 @@ export const Timeline = ({ flights, circles, activeCircleId, onScopeChange, load
           <p>No flights found. Add your first flight to get started!</p>
         </div>
       )}
+
+      <div className="mt-8 pt-6 border-t border-gray-200">
+        <button
+          onClick={onAddFlight}
+          className="w-full px-4 py-3 rounded-lg bg-primary-500 hover:bg-primary-600 text-white font-medium transition-colors flex items-center justify-center gap-2"
+        >
+          <span className="text-xl">+</span>
+          <span>Add Flight</span>
+        </button>
+      </div>
     </div>
   );
 };

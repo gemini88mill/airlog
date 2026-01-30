@@ -3,6 +3,7 @@ import { apiClient } from '../lib/apiClient';
 import { DashboardHeader } from './organisms/DashboardHeader';
 import { Sidebar } from './organisms/Sidebar';
 import { Timeline } from './organisms/Timeline';
+import { AddFlightForm } from './organisms/AddFlightForm';
 
 type Circle = {
   id: string;
@@ -111,14 +112,23 @@ export const Dashboard = ({ bootstrapData, onLogout }: DashboardProps) => {
               circles={bootstrapData.circles}
               activeCircleId={activeCircleId}
               onScopeChange={handleScopeChange}
+              onAddFlight={() => setActiveView('add-flight')}
               loading={loading}
             />
           )}
           {activeView === 'add-flight' && (
-            <div className="p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Add Flight</h2>
-              <p className="text-gray-600">Add flight form coming soon...</p>
-            </div>
+            <AddFlightForm
+              userId={bootstrapData.user.id}
+              activeCircleId={activeCircleId}
+              onSuccess={() => {
+                // Refresh flights and return to timeline
+                fetchFlights(scope, activeCircleId);
+                setActiveView('timeline');
+              }}
+              onCancel={() => {
+                setActiveView('timeline');
+              }}
+            />
           )}
           {activeView === 'circle' && (
             <div className="p-6">

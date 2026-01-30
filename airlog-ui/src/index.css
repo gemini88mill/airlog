@@ -75,3 +75,10 @@ h1 {
     color: #747bff;
   }
 }
+
+/* Date picker calendar icon styling - make it dark */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 1;
+  cursor: pointer;
+}
