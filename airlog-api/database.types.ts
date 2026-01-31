@@ -14,6 +14,99 @@ export type Database = {
   }
   public: {
     Tables: {
+      airlines: {
+        Row: {
+          active: boolean
+          alias: string | null
+          callsign: string | null
+          country: string
+          iata: string | null
+          icao: string | null
+          id: number
+          name: string
+        }
+        Insert: {
+          active?: boolean
+          alias?: string | null
+          callsign?: string | null
+          country: string
+          iata?: string | null
+          icao?: string | null
+          id: number
+          name: string
+        }
+        Update: {
+          active?: boolean
+          alias?: string | null
+          callsign?: string | null
+          country?: string
+          iata?: string | null
+          icao?: string | null
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
+      airports: {
+        Row: {
+          altitude: number
+          city: string
+          country: string
+          created_at: string | null
+          dst: string
+          iata_code: string | null
+          icao_code: string | null
+          id: number
+          latitude: number
+          longitude: number
+          name: string
+          openflights_id: number
+          source: string
+          timezone: string
+          timezone_offset: number
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          altitude: number
+          city: string
+          country: string
+          created_at?: string | null
+          dst: string
+          iata_code?: string | null
+          icao_code?: string | null
+          id?: number
+          latitude: number
+          longitude: number
+          name: string
+          openflights_id: number
+          source: string
+          timezone: string
+          timezone_offset: number
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          altitude?: number
+          city?: string
+          country?: string
+          created_at?: string | null
+          dst?: string
+          iata_code?: string | null
+          icao_code?: string | null
+          id?: number
+          latitude?: number
+          longitude?: number
+          name?: string
+          openflights_id?: number
+          source?: string
+          timezone?: string
+          timezone_offset?: number
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       circle_members: {
         Row: {
           circle_id: string
@@ -123,6 +216,33 @@ export type Database = {
           },
         ]
       }
+      planes: {
+        Row: {
+          created_at: string | null
+          iata_code: string | null
+          icao_code: string | null
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          iata_code?: string | null
+          icao_code?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          iata_code?: string | null
+          icao_code?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -144,6 +264,51 @@ export type Database = {
           display_name?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      routes: {
+        Row: {
+          airline_code: string
+          airline_id: number | null
+          codeshare: string | null
+          created_at: string | null
+          destination_airport_code: string
+          destination_airport_id: number | null
+          equipment: string | null
+          id: string
+          source_airport_code: string
+          source_airport_id: number | null
+          stops: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          airline_code: string
+          airline_id?: number | null
+          codeshare?: string | null
+          created_at?: string | null
+          destination_airport_code: string
+          destination_airport_id?: number | null
+          equipment?: string | null
+          id?: string
+          source_airport_code: string
+          source_airport_id?: number | null
+          stops?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          airline_code?: string
+          airline_id?: number | null
+          codeshare?: string | null
+          created_at?: string | null
+          destination_airport_code?: string
+          destination_airport_id?: number | null
+          equipment?: string | null
+          id?: string
+          source_airport_code?: string
+          source_airport_id?: number | null
+          stops?: number | null
+          updated_at?: string | null
         }
         Relationships: []
       }
