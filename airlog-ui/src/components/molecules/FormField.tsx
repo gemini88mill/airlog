@@ -1,11 +1,11 @@
-import { Field } from "@headlessui/react";
-import { Input } from "../atoms/Input";
-import { Label } from "../atoms/Label";
+import { Field } from '@headlessui/react';
+import { Input } from '../atoms/Input';
+import { Label } from '../atoms/Label';
 
 type FormFieldProps = {
   id?: string;
   label: string;
-  type?: "text" | "email" | "password" | "number" | "tel" | "url" | "date";
+  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'date';
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
@@ -17,13 +17,13 @@ type FormFieldProps = {
 export const FormField = ({
   id,
   label,
-  type = "text",
+  type = 'text',
   value,
   onChange,
   placeholder,
   required = false,
   disabled = false,
-  className = "",
+  className = '',
 }: FormFieldProps) => {
   const inputClassName = `
     w-full px-3 py-3 border border-gray-300 rounded text-base
@@ -35,7 +35,7 @@ export const FormField = ({
   return (
     <Field disabled={disabled} className={`mb-4 ${className}`}>
       <Label required={required}>{label}</Label>
-      {type === "date" ? (
+      {type === 'date' ? (
         <div className="relative z-[1000]">
           <input
             id={id}
@@ -51,7 +51,7 @@ export const FormField = ({
         <Input
           id={id}
           type={
-            type as "text" | "email" | "password" | "number" | "tel" | "url"
+            type as 'text' | 'email' | 'password' | 'number' | 'tel' | 'url'
           }
           value={value}
           onChange={onChange}

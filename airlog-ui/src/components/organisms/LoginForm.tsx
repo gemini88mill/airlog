@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { Button } from '../atoms/Button';
-import { FormField } from '../molecules/FormField';
-import { ErrorMessage } from '../atoms/ErrorMessage';
+import { useState } from "react";
+import { Button } from "../atoms/Button";
+import { FormField } from "../molecules/FormField";
+import { ErrorMessage } from "../atoms/ErrorMessage";
 
 type LoginFormProps = {
   onSubmit: (email: string, password: string) => Promise<void>;
@@ -9,8 +9,8 @@ type LoginFormProps = {
 };
 
 export const LoginForm = ({ onSubmit, isLoading = false }: LoginFormProps) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -22,7 +22,9 @@ export const LoginForm = ({ onSubmit, isLoading = false }: LoginFormProps) => {
     try {
       await onSubmit(email, password);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
+      setError(
+        err instanceof Error ? err.message : "An unexpected error occurred"
+      );
     } finally {
       setLoading(false);
     }
@@ -62,7 +64,7 @@ export const LoginForm = ({ onSubmit, isLoading = false }: LoginFormProps) => {
         loading={isFormLoading}
         disabled={isFormLoading}
       >
-        {isFormLoading ? 'Logging in...' : 'Login'}
+        {isFormLoading ? "Logging in..." : "Login"}
       </Button>
     </form>
   );

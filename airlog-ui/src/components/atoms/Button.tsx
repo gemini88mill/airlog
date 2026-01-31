@@ -8,9 +8,9 @@ type ButtonProps = {
   loading?: boolean;
 };
 
-export const Button = ({ 
-  children, 
-  onClick, 
+export const Button = ({
+  children,
+  onClick,
   variant = 'primary',
   disabled = false,
   type = 'button',

@@ -45,7 +45,7 @@ type DashboardProps = {
 
 export const Dashboard = ({ bootstrapData, onLogout }: DashboardProps) => {
   const [activeCircleId, setActiveCircleId] = useState<string | null>(
-    bootstrapData.defaults.activeCircleId
+    bootstrapData.defaults.activeCircleId,
   );
   const [flights, setFlights] = useState<Flight[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,7 +61,7 @@ export const Dashboard = ({ bootstrapData, onLogout }: DashboardProps) => {
       }
 
       const response = await apiClient.get(`/v1/flights?${params.toString()}`);
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch flights');
       }

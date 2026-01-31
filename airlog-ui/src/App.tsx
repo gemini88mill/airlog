@@ -41,7 +41,7 @@ export const App = () => {
     setBootstrapLoading(true);
     try {
       const response = await apiClient.get('/v1/bootstrap');
-      
+
       if (!response.ok) {
         if (response.status === 401) {
           // Token invalid, clear user
@@ -104,4 +104,3 @@ export const App = () => {
 
   return <Dashboard bootstrapData={bootstrapData} onLogout={handleLogout} />;
 };
-

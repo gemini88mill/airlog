@@ -176,9 +176,7 @@ export const AddFlightForm = ({
       <form onSubmit={handleSubmit} className="space-y-4">
         {!showManualEntry && (
           <Field className="mb-4">
-            <Label>
-              Search Flight
-            </Label>
+            <Label>Search Flight</Label>
             <FlightCombobox
               value={selectedFlight}
               onChange={setSelectedFlight}

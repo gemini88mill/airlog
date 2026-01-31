@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
-import { Combobox } from "../atoms/Combobox";
-import { useDebounce } from "../../lib/useDebounce";
+import { useState, useEffect, useCallback } from 'react';
+import { Combobox } from '../atoms/Combobox';
+import { useDebounce } from '../../lib/useDebounce';
 
 type FlightData = {
   flight: {
@@ -54,9 +54,8 @@ type FlightComboboxProps = {
 };
 
 const AVIATIONSTACK_API_KEY = import.meta.env.VITE_AVIATIONSTACK_API_KEY;
-const AVIATIONSTACK_BASE_URL =
-  import.meta.env.VITE_AVIATIONSTACK_BASE_URL ||
-  "https://api.aviationstack.com/v1";
+const AVIATIONSTACK_BASE_URL = import.meta.env.VITE_AVIATIONSTACK_BASE_URL
+  || 'https://api.aviationstack.com/v1';
 
 const searchFlights = async (query: string): Promise<FlightData[]> => {
   if (!query || query.length < 2) {
@@ -65,7 +64,7 @@ const searchFlights = async (query: string): Promise<FlightData[]> => {
 
   if (!AVIATIONSTACK_API_KEY) {
     console.error(
-      "AviationStack API key is missing. Please set VITE_AVIATIONSTACK_API_KEY in your .env file."
+      'AviationStack API key is missing. Please set VITE_AVIATIONSTACK_API_KEY in your .env file.',
     );
     return [];
   }
@@ -73,8 +72,8 @@ const searchFlights = async (query: string): Promise<FlightData[]> => {
   try {
     const params = new URLSearchParams({
       access_key: AVIATIONSTACK_API_KEY,
-      limit: "100",
-      offset: "0",
+      limit: '100',
+      offset: '0',
       flight_iata: query.toUpperCase(),
     });
 
@@ -82,9 +81,9 @@ const searchFlights = async (query: string): Promise<FlightData[]> => {
       `${AVIATIONSTACK_BASE_URL}/flights?${params.toString()}`,
       {
         headers: {
-          accept: "application/json",
+          accept: 'application/json',
         },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -94,7 +93,7 @@ const searchFlights = async (query: string): Promise<FlightData[]> => {
     const data = (await response.json()) as AviationStackResponse;
     return data.data || [];
   } catch (error) {
-    console.error("Error searching flights:", error);
+    console.error('Error searching flights:', error);
     return [];
   }
 };
@@ -111,13 +110,13 @@ const formatFlightLabel = (flight: FlightData): string => {
 export const FlightCombobox = ({
   value,
   onChange,
-  placeholder = "Search for a flight (e.g., DL296)",
+  placeholder = 'Search for a flight (e.g., DL296)',
   disabled = false,
-  className = "",
+  className = '',
   onQueryChange,
   onNoResults,
 }: FlightComboboxProps) => {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('');
   const [options, setOptions] = useState<FlightOption[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -147,7 +146,7 @@ export const FlightCombobox = ({
           onNoResults(true, searchQuery);
         }
       } catch (error) {
-        console.error("Error fetching flights:", error);
+        console.error('Error fetching flights:', error);
         setOptions([]);
         if (onNoResults) {
           onNoResults(true, searchQuery);
@@ -156,7 +155,7 @@ export const FlightCombobox = ({
         setLoading(false);
       }
     },
-    [onNoResults]
+    [onNoResults],
   );
 
   useEffect(() => {
@@ -170,7 +169,7 @@ export const FlightCombobox = ({
 
   const displayValue = (flight: FlightData | null): string => {
     if (!flight) {
-      return "";
+      return '';
     }
     return formatFlightLabel(flight);
   };
@@ -188,8 +187,8 @@ export const FlightCombobox = ({
       loading={loading}
       emptyMessage={
         query.length < 2
-          ? "Type at least 2 characters to search"
-          : "No flights found"
+          ? 'Type at least 2 characters to search'
+          : 'No flights found'
       }
     />
   );

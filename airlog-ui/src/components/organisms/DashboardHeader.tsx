@@ -21,7 +21,7 @@ export const DashboardHeader = ({
   onProfileClick,
   displayName,
 }: DashboardHeaderProps) => {
-  const activeCircle = circles.find(c => c.id === activeCircleId) || circles[0];
+  const activeCircle = circles.find((c) => c.id === activeCircleId) || circles[0];
   const [isCircleDropdownOpen, setIsCircleDropdownOpen] = useState(false);
 
   return (
@@ -40,8 +40,8 @@ export const DashboardHeader = ({
           </button>
           {isCircleDropdownOpen && (
             <>
-              <div 
-                className="fixed inset-0 z-10" 
+              <div
+                className="fixed inset-0 z-10"
                 onClick={() => setIsCircleDropdownOpen(false)}
               />
               <div className="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-20 min-w-[200px]">

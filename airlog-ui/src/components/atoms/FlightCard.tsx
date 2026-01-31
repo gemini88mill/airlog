@@ -25,17 +25,15 @@ export const FlightCard = ({
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
-  const formatRole = (role: string): string => {
-    return role.charAt(0).toUpperCase() + role.slice(1);
-  };
+  const formatRole = (role: string): string => role.charAt(0).toUpperCase() + role.slice(1);
 
-  const route = originIata && destinationIata 
+  const route = originIata && destinationIata
     ? `${originIata} → ${destinationIata}`
-    : originIata 
-    ? `${originIata} → TBD`
-    : destinationIata
-    ? `TBD → ${destinationIata}`
-    : 'Route TBD';
+    : originIata
+      ? `${originIata} → TBD`
+      : destinationIata
+        ? `TBD → ${destinationIata}`
+        : 'Route TBD';
 
   const airlineCode = airlineIata || 'XX';
 
@@ -46,7 +44,9 @@ export const FlightCard = ({
           <div className="flex items-center gap-2 mb-2">
             <span className="text-xl">✈</span>
             <span className="font-semibold text-gray-900">
-              {airlineCode} {flightNumber}
+              {airlineCode}
+              {' '}
+              {flightNumber}
             </span>
             <span className="text-sm text-gray-600">{formatRole(role)}</span>
             <span className="text-sm text-gray-600">{visibility === 'shared' ? 'Shared' : 'Private'}</span>
