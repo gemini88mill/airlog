@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  font-family: 'Telex', system-ui, -apple-system, sans-serif;
+  font-family: "Telex", system-ui, -apple-system, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -20,7 +20,7 @@
   --color-primary-200: #a3b9d7;
   --color-primary-300: #7596c3;
   --color-primary-400: #4773af;
-  --color-primary-500: #2F5B8F;
+  --color-primary-500: #2f5b8f;
   --color-primary-600: #264973;
   --color-primary-700: #1c3757;
   --color-primary-800: #13253b;
@@ -33,7 +33,7 @@
   --color-primary-200: #a3b9d7;
   --color-primary-300: #7596c3;
   --color-primary-400: #4773af;
-  --color-primary-500: #2F5B8F;
+  --color-primary-500: #2f5b8f;
   --color-primary-600: #264973;
   --color-primary-700: #1c3757;
   --color-primary-800: #13253b;
@@ -49,7 +49,8 @@ a:hover {
   color: #535bf2;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   /* padding: 0;
   width: 100%;
