@@ -3,9 +3,11 @@ import {
   ComboboxInput,
   ComboboxOption,
   ComboboxOptions,
-} from '@headlessui/react';
-import { useState } from 'react';
-import type { ComponentProps } from 'react';
+  Field,
+} from "@headlessui/react";
+import { useState } from "react";
+import type { ComponentProps } from "react";
+import { Label } from "./Label";
 
 type ComboboxOption<T> = {
   id: string | number;
@@ -28,7 +30,12 @@ type ComboboxProps<T> = {
   onQueryChange?: (query: string) => void;
   loading?: boolean;
   emptyMessage?: string;
-} & Omit<ComponentProps<typeof HeadlessCombobox>, 'value' | 'onChange' | 'children'>;
+  label?: string;
+  required?: boolean;
+} & Omit<
+  ComponentProps<typeof HeadlessCombobox>,
+  "value" | "onChange" | "children" | "onClose"
+>;
 
 export const Combobox = <T,>({
   value,
@@ -37,16 +44,18 @@ export const Combobox = <T,>({
   displayValue,
   placeholder,
   disabled = false,
-  className = '',
-  inputClassName = '',
-  optionsClassName = '',
-  optionClassName = '',
+  className = "",
+  inputClassName = "",
+  optionsClassName = "",
+  optionClassName = "",
   onQueryChange,
   loading = false,
-  emptyMessage = 'No options found',
+  emptyMessage = "No options found",
+  label,
+  required = false,
   ...props
 }: ComboboxProps<T>) => {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
 
   const handleQueryChange = (newQuery: string) => {
     setQuery(newQuery);
@@ -54,7 +63,7 @@ export const Combobox = <T,>({
   };
 
   const handleClose = () => {
-    setQuery('');
+    setQuery("");
   };
 
   const getDisplayValue = (val: T | null): string => {
@@ -62,17 +71,27 @@ export const Combobox = <T,>({
       return displayValue(val);
     }
     if (val === null) {
-      return '';
+      return "";
     }
     const option = options.find((opt) => opt.value === val);
     return option?.label || String(val);
   };
 
-  return (
+  const handleChange = (newValue: T | null | T[] | null[]) => {
+    // HeadlessCombobox may pass an array, but we only support single selection
+    if (Array.isArray(newValue)) {
+      onChange(newValue.length > 0 ? (newValue[0] as T) : null);
+    } else {
+      onChange(newValue as T | null);
+    }
+  };
+
+  const comboboxContent = (
     <div className={`relative ${className}`}>
       <HeadlessCombobox
         value={value}
-        onChange={onChange}
+        // @ts-expect-error - HeadlessCombobox onChange type is too broad, but our handler works correctly
+        onChange={handleChange}
         onClose={handleClose}
         disabled={disabled}
         {...props}
@@ -91,9 +110,9 @@ export const Combobox = <T,>({
           `}
         />
         <ComboboxOptions
-          anchor="bottom"
+          anchor="bottom start"
           className={`
-            mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5
+            mt-1 max-h-60 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5
             empty:invisible
             ${optionsClassName}
           `}
@@ -114,7 +133,7 @@ export const Combobox = <T,>({
               value={option.value}
               disabled={option.disabled}
               className={`
-                relative cursor-default select-none px-4 py-2
+                relative cursor-default select-none px-4 py-2 whitespace-nowrap
                 text-gray-900
                 data-focus:bg-blue-100 data-focus:text-white
                 data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:text-gray-500
@@ -128,4 +147,15 @@ export const Combobox = <T,>({
       </HeadlessCombobox>
     </div>
   );
+
+  if (label) {
+    return (
+      <Field>
+        <Label required={required}>{label}</Label>
+        {comboboxContent}
+      </Field>
+    );
+  }
+
+  return comboboxContent;
 };

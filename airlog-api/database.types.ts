@@ -167,7 +167,7 @@ export type Database = {
           created_at: string
           destination_iata: string | null
           flight_date: string
-          flight_number: string
+          flight_number: number
           id: string
           note: string | null
           origin_iata: string | null
@@ -182,7 +182,7 @@ export type Database = {
           created_at?: string
           destination_iata?: string | null
           flight_date: string
-          flight_number: string
+          flight_number: number
           id?: string
           note?: string | null
           origin_iata?: string | null
@@ -197,7 +197,7 @@ export type Database = {
           created_at?: string
           destination_iata?: string | null
           flight_date?: string
-          flight_number?: string
+          flight_number?: number
           id?: string
           note?: string | null
           origin_iata?: string | null
@@ -276,6 +276,7 @@ export type Database = {
           destination_airport_code: string
           destination_airport_id: number | null
           equipment: string | null
+          flight_num: string | null
           id: string
           source_airport_code: string
           source_airport_id: number | null
@@ -290,6 +291,7 @@ export type Database = {
           destination_airport_code: string
           destination_airport_id?: number | null
           equipment?: string | null
+          flight_num?: string | null
           id?: string
           source_airport_code: string
           source_airport_id?: number | null
@@ -304,13 +306,22 @@ export type Database = {
           destination_airport_code?: string
           destination_airport_id?: number | null
           equipment?: string | null
+          flight_num?: string | null
           id?: string
           source_airport_code?: string
           source_airport_id?: number | null
           stops?: number | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "routes_airline_id_fkey"
+            columns: ["airline_id"]
+            isOneToOne: false
+            referencedRelation: "airlines"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

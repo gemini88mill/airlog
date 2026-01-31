@@ -1,6 +1,28 @@
 import { supabase } from "../supabaseClient";
 import type { TablesInsert } from "../database.types";
 
+// Helper function to extract just the numeric part from flight number and convert to integer
+// Examples: "DL296" -> 296, "DL 296" -> 296, "AA1234" -> 1234, "296" -> 296
+const extractFlightNumber = (flightNumber: string): number | null => {
+  // Remove leading airline code (2-3 letters, case insensitive) and any spaces
+  // Then extract the numeric part
+  const cleaned = flightNumber.replace(/^[A-Z]{2,3}\s*/i, "").trim();
+  const numericMatch = cleaned.match(/\d+/);
+  
+  if (!numericMatch) {
+    return null;
+  }
+  
+  const numericValue = parseInt(numericMatch[0], 10);
+  
+  // Validate it's a valid integer
+  if (isNaN(numericValue)) {
+    return null;
+  }
+  
+  return numericValue;
+};
+
 export const flightsRoutes = {
   // POST /v1/flights → add flight
   // GET /v1/flights?scope=mine|shared|circle&circleId=...
@@ -19,9 +41,20 @@ export const flightsRoutes = {
           );
         }
 
+        const rawFlightNumber = data.flight_number as string;
+        // Extract just the numeric part and convert to integer (e.g., "DL296" -> 296)
+        const flightNumberNumeric = extractFlightNumber(rawFlightNumber);
+
+        if (flightNumberNumeric === null) {
+          return Response.json(
+            { error: "Invalid flight number. Could not extract a valid numeric flight number." },
+            { status: 400 }
+          );
+        }
+
         const flightData: TablesInsert<"flights"> = {
           flight_date: data.flight_date as string,
-          flight_number: data.flight_number as string,
+          flight_number: flightNumberNumeric,
           user_id: data.user_id as string,
           airline_iata: (data.airline_iata as string) || null,
           destination_iata: (data.destination_iata as string) || null,

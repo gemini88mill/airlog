@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Field, Label } from "@headlessui/react";
 import { FlightCombobox } from "../molecules/FlightCombobox";
+import { AirlineCombobox, type Airline } from "../molecules/AirlineCombobox";
+import { AirportCombobox, type Airport } from "../molecules/AirportCombobox";
 import { FormField } from "../molecules/FormField";
 import { SelectField } from "../molecules/SelectField";
 import { Button } from "../atoms/Button";
@@ -49,6 +51,7 @@ type FlightFormData = {
   visibility: "private" | "shared";
 };
 
+
 export const AddFlightForm = ({
   userId,
   activeCircleId,
@@ -62,6 +65,13 @@ export const AddFlightForm = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Airline combobox state
+  const [selectedAirline, setSelectedAirline] = useState<Airline | null>(null);
+
+  // Airport combobox state
+  const [selectedOriginAirport, setSelectedOriginAirport] = useState<Airport | null>(null);
+  const [selectedDestinationAirport, setSelectedDestinationAirport] = useState<Airport | null>(null);
+
   const [formData, setFormData] = useState<FlightFormData>({
     flight_number: "",
     flight_date: "",
@@ -71,6 +81,8 @@ export const AddFlightForm = ({
     role: "passenger",
     visibility: "private",
   });
+
+
 
   // Auto-fill form when flight is selected from combobox
   useEffect(() => {
@@ -89,6 +101,64 @@ export const AddFlightForm = ({
         role: "passenger",
         visibility: "private",
       });
+      
+      // Fetch and set selected airline
+      if (selectedFlight.airline.iata) {
+        const fetchAirline = async () => {
+          try {
+            const response = await apiClient.get(`/v1/airlines?q=${encodeURIComponent(selectedFlight.airline.iata)}&limit=1`);
+            if (response.ok) {
+              const data = await response.json();
+              const airline = data.airlines?.find((a: Airline) => a.iata === selectedFlight.airline.iata);
+              if (airline) {
+                setSelectedAirline(airline);
+              }
+            }
+          } catch (err) {
+            console.error("Failed to fetch airline:", err);
+          }
+        };
+        fetchAirline();
+      }
+      
+      // Fetch and set selected origin airport
+      if (selectedFlight.departure.iata) {
+        const fetchOriginAirport = async () => {
+          try {
+            const response = await apiClient.get(`/v1/airports?q=${encodeURIComponent(selectedFlight.departure.iata)}&limit=1`);
+            if (response.ok) {
+              const data = await response.json();
+              const airport = data.airports?.find((a: Airport) => a.iata_code === selectedFlight.departure.iata);
+              if (airport) {
+                setSelectedOriginAirport(airport);
+              }
+            }
+          } catch (err) {
+            console.error("Failed to fetch origin airport:", err);
+          }
+        };
+        fetchOriginAirport();
+      }
+      
+      // Fetch and set selected destination airport
+      if (selectedFlight.arrival.iata) {
+        const fetchDestinationAirport = async () => {
+          try {
+            const response = await apiClient.get(`/v1/airports?q=${encodeURIComponent(selectedFlight.arrival.iata)}&limit=1`);
+            if (response.ok) {
+              const data = await response.json();
+              const airport = data.airports?.find((a: Airport) => a.iata_code === selectedFlight.arrival.iata);
+              if (airport) {
+                setSelectedDestinationAirport(airport);
+              }
+            }
+          } catch (err) {
+            console.error("Failed to fetch destination airport:", err);
+          }
+        };
+        fetchDestinationAirport();
+      }
+      
       setShowManualEntry(false);
     }
   }, [selectedFlight]);
@@ -101,6 +171,33 @@ export const AddFlightForm = ({
         [field]: e.target.value,
       }));
     };
+
+  // Handle airline selection
+  const handleAirlineChange = (airline: Airline | null) => {
+    setSelectedAirline(airline);
+    setFormData((prev) => ({
+      ...prev,
+      airline_iata: airline?.iata || "",
+    }));
+  };
+
+  // Handle origin airport selection
+  const handleOriginAirportChange = (airport: Airport | null) => {
+    setSelectedOriginAirport(airport);
+    setFormData((prev) => ({
+      ...prev,
+      origin_iata: airport?.iata_code || "",
+    }));
+  };
+
+  // Handle destination airport selection
+  const handleDestinationAirportChange = (airport: Airport | null) => {
+    setSelectedDestinationAirport(airport);
+    setFormData((prev) => ({
+      ...prev,
+      destination_iata: airport?.iata_code || "",
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,6 +240,9 @@ export const AddFlightForm = ({
       setShowManualEntry(false);
       setHasSearched(false);
       setSearchQuery("");
+      setSelectedAirline(null);
+      setSelectedOriginAirport(null);
+      setSelectedDestinationAirport(null);
 
       onSuccess?.();
     } catch (err) {
@@ -253,32 +353,26 @@ export const AddFlightForm = ({
         />
 
         <div className="grid grid-cols-2 gap-4">
-          <FormField
-            id="airline_iata"
-            label="Airline Code (IATA)"
-            value={formData.airline_iata}
-            onChange={handleInputChange("airline_iata")}
-            placeholder="e.g., DL"
+          <AirlineCombobox
+            value={selectedAirline}
+            onChange={handleAirlineChange}
             disabled={loading}
+            label="Airline"
           />
 
-          <FormField
-            id="origin_iata"
-            label="Origin Airport (IATA)"
-            value={formData.origin_iata}
-            onChange={handleInputChange("origin_iata")}
-            placeholder="e.g., JFK"
+          <AirportCombobox
+            value={selectedOriginAirport}
+            onChange={handleOriginAirportChange}
             disabled={loading}
+            label="Origin Airport"
           />
         </div>
 
-        <FormField
-          id="destination_iata"
-          label="Destination Airport (IATA)"
-          value={formData.destination_iata}
-          onChange={handleInputChange("destination_iata")}
-          placeholder="e.g., LAX"
+        <AirportCombobox
+          value={selectedDestinationAirport}
+          onChange={handleDestinationAirportChange}
           disabled={loading}
+          label="Destination Airport"
         />
 
         <div className="grid grid-cols-2 gap-4">
