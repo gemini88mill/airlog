@@ -63,32 +63,31 @@ type FlightComboboxProps = {
   onNoResults?: (hasSearched: boolean, query: string) => void;
 };
 
-const AVIATIONSTACK_API_KEY = import.meta.env.VITE_AVIATIONSTACK_API_KEY;
-const AVIATIONSTACK_BASE_URL = import.meta.env.VITE_AVIATIONSTACK_BASE_URL
-  || 'https://api.aviationstack.com/v1';
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const isAviationStackResponse = (value: unknown): value is AviationStackResponse => {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return Array.isArray(value.data);
+};
 
 const searchFlights = async (query: string): Promise<FlightData[]> => {
   if (!query || query.length < 2) {
     return [];
   }
 
-  if (!AVIATIONSTACK_API_KEY) {
-    console.error(
-      'AviationStack API key is missing. Please set VITE_AVIATIONSTACK_API_KEY in your .env file.',
-    );
-    return [];
-  }
-
   try {
     const params = new URLSearchParams({
-      access_key: AVIATIONSTACK_API_KEY,
+      flight_iata: query.toUpperCase(),
       limit: '100',
       offset: '0',
-      flight_iata: query.toUpperCase(),
     });
 
-    const response = await fetch(
-      `${AVIATIONSTACK_BASE_URL}/flights?${params.toString()}`,
+    const response = await apiClient.get(
+      `/v1/aviationstack/flights?${params.toString()}`,
       {
         headers: {
           accept: 'application/json',
@@ -100,7 +99,12 @@ const searchFlights = async (query: string): Promise<FlightData[]> => {
       throw new Error(`AviationStack API error: ${response.status}`);
     }
 
-    const data = (await response.json()) as AviationStackResponse;
+    const data = await response.json();
+    if (!isAviationStackResponse(data)) {
+      console.error('Unexpected AviationStack response payload.');
+      return [];
+    }
+
     return data.data || [];
   } catch (error) {
     console.error('Error searching flights:', error);

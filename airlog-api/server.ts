@@ -5,6 +5,7 @@ import { bootstrapRoutes } from "./routes/bootstrap";
 import { airlinesRoutes } from "./routes/airlines";
 import { airportsRoutes } from "./routes/airports";
 import { routesRoutes } from "./routes/routes";
+import { aviationStackRoutes } from "./routes/aviationStack";
 
 const ALLOWED_ORIGINS = [
   "http://localhost:5137",
@@ -56,6 +57,7 @@ const allRoutes = {
   ...airlinesRoutes,
   ...airportsRoutes,
   ...routesRoutes,
+  ...aviationStackRoutes,
 } as unknown as Record<string, RouteHandler>;
 
 const server = Bun.serve({
