@@ -1,6 +1,7 @@
 import { supabase } from "../supabaseClient";
 import { HTTPMethods } from "../HTTPMethods";
-import type { TablesInsert, TablesUpdate } from "../database.types";
+import type { TablesInsert } from "../database.types";
+import { upsertRouteByAirlineAndAirports } from "./routeUpsert";
 
 // Helper function to extract just the numeric part from flight number and convert to integer
 // Examples: "DL296" -> 296, "DL 296" -> 296, "AA1234" -> 1234, "296" -> 296
@@ -92,54 +93,15 @@ export const flightsRoutes = {
             flightData.origin_iata &&
             flightData.destination_iata
           ) {
-            try {
-              // Check if route already exists
-              const { data: existingRoute, error: findError } = await supabase
-                .from("routes")
-                .select("id")
-                .eq("airline_code", flightData.airline_iata)
-                .eq("source_airport_code", flightData.origin_iata)
-                .eq("destination_airport_code", flightData.destination_iata)
-                .maybeSingle();
+            const { error: routeError } =
+              await upsertRouteByAirlineAndAirports({
+                airlineIata: flightData.airline_iata,
+                originIata: flightData.origin_iata,
+                destinationIata: flightData.destination_iata,
+                flightNumber: rawFlightNumber,
+              });
 
-              if (findError) {
-                console.error("Error finding route:", findError);
-                // Continue without failing the flight creation
-              } else if (existingRoute) {
-                // Update existing route
-                const routeUpdate: TablesUpdate<"routes"> = {
-                  flight_num: rawFlightNumber,
-                  updated_at: new Date().toISOString(),
-                };
-
-                const { error: updateError } = await supabase
-                  .from("routes")
-                  .update(routeUpdate)
-                  .eq("id", existingRoute.id);
-
-                if (updateError) {
-                  console.error("Error updating route:", updateError);
-                  // Continue without failing the flight creation
-                }
-              } else {
-                // Create new route
-                const routeData: TablesInsert<"routes"> = {
-                  airline_code: flightData.airline_iata,
-                  source_airport_code: flightData.origin_iata,
-                  destination_airport_code: flightData.destination_iata,
-                  flight_num: rawFlightNumber,
-                };
-
-                const { error: insertError } = await supabase
-                  .from("routes")
-                  .insert(routeData);
-
-                if (insertError) {
-                  console.error("Error inserting route:", insertError);
-                  // Continue without failing the flight creation
-                }
-              }
-            } catch (routeError) {
+            if (routeError) {
               console.error("Error upserting route:", routeError);
               // Continue without failing the flight creation
             }

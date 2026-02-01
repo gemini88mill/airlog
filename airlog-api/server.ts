@@ -4,6 +4,7 @@ import { authRoutes } from "./routes/auth";
 import { bootstrapRoutes } from "./routes/bootstrap";
 import { airlinesRoutes } from "./routes/airlines";
 import { airportsRoutes } from "./routes/airports";
+import { routesRoutes } from "./routes/routes";
 
 const ALLOWED_ORIGINS = [
   "http://localhost:5137",
@@ -47,6 +48,7 @@ const allRoutes: Record<string, (req: Request | any) => Response | Promise<Respo
   ...flightsRoutes,
   ...airlinesRoutes,
   ...airportsRoutes,
+  ...routesRoutes,
 };
 
 const server = Bun.serve({

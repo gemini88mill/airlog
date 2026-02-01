@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Combobox } from '../atoms/Combobox';
 import { useDebounce } from '../../lib/useDebounce';
+import { apiClient } from '../../lib/apiClient';
 
 type FlightData = {
   flight: {
@@ -41,6 +42,15 @@ type AviationStackResponse = {
     count: number;
     total: number;
   };
+};
+
+type RouteUpsertPayload = {
+  routes: Array<{
+    airline_iata: string;
+    origin_iata: string;
+    destination_iata: string;
+    flight_number: string;
+  }>;
 };
 
 type FlightComboboxProps = {
@@ -98,6 +108,53 @@ const searchFlights = async (query: string): Promise<FlightData[]> => {
   }
 };
 
+const upsertRoutesFromAviationStack = async (flights: FlightData[]): Promise<void> => {
+  if (!flights.length) {
+    return;
+  }
+
+  const uniqueRoutes = new Map<string, RouteUpsertPayload['routes'][number]>();
+
+  flights.forEach((flight) => {
+    const airlineIata = flight.airline.iata;
+    const originIata = flight.departure.iata;
+    const destinationIata = flight.arrival.iata;
+    const flightNumber = flight.flight.iata || flight.flight.number;
+
+    if (!airlineIata || !originIata || !destinationIata || !flightNumber) {
+      return;
+    }
+
+    const key = `${airlineIata}|${originIata}|${destinationIata}|${flightNumber}`;
+    if (uniqueRoutes.has(key)) {
+      return;
+    }
+
+    uniqueRoutes.set(key, {
+      airline_iata: airlineIata,
+      origin_iata: originIata,
+      destination_iata: destinationIata,
+      flight_number: flightNumber,
+    });
+  });
+
+  if (uniqueRoutes.size === 0) {
+    return;
+  }
+
+  try {
+    const response = await apiClient.post('/v1/routes/bulk', {
+      routes: Array.from(uniqueRoutes.values()),
+    } satisfies RouteUpsertPayload);
+
+    if (!response.ok) {
+      console.error('Failed to bulk upsert routes:', response.status);
+    }
+  } catch (error) {
+    console.error('Error bulk upserting routes:', error);
+  }
+};
+
 const formatFlightLabel = (flight: FlightData): string => {
   const airline = flight.airline.name || flight.airline.iata;
   const flightNumber = flight.flight.iata || flight.flight.number;
@@ -132,6 +189,7 @@ export const FlightCombobox = ({
       setLoading(true);
       try {
         const flights = await searchFlights(searchQuery);
+        void upsertRoutesFromAviationStack(flights);
         const flightOptions: FlightOption[] = flights.map((flight) => ({
           id: `${flight.flight.iata || flight.flight.number}-${
             flight.departure.iata
