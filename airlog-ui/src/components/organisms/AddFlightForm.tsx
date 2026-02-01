@@ -51,7 +51,6 @@ type FlightFormData = {
   visibility: "private" | "shared";
 };
 
-
 export const AddFlightForm = ({
   userId,
   activeCircleId,
@@ -69,8 +68,10 @@ export const AddFlightForm = ({
   const [selectedAirline, setSelectedAirline] = useState<Airline | null>(null);
 
   // Airport combobox state
-  const [selectedOriginAirport, setSelectedOriginAirport] = useState<Airport | null>(null);
-  const [selectedDestinationAirport, setSelectedDestinationAirport] = useState<Airport | null>(null);
+  const [selectedOriginAirport, setSelectedOriginAirport] =
+    useState<Airport | null>(null);
+  const [selectedDestinationAirport, setSelectedDestinationAirport] =
+    useState<Airport | null>(null);
 
   const [formData, setFormData] = useState<FlightFormData>({
     flight_number: "",
@@ -81,8 +82,6 @@ export const AddFlightForm = ({
     role: "passenger",
     visibility: "private",
   });
-
-
 
   // Auto-fill form when flight is selected from combobox
   useEffect(() => {
@@ -101,15 +100,21 @@ export const AddFlightForm = ({
         role: "passenger",
         visibility: "private",
       });
-      
+
       // Fetch and set selected airline
       if (selectedFlight.airline.iata) {
         const fetchAirline = async () => {
           try {
-            const response = await apiClient.get(`/v1/airlines?q=${encodeURIComponent(selectedFlight.airline.iata)}&limit=1`);
+            const response = await apiClient.get(
+              `/v1/airlines?q=${encodeURIComponent(
+                selectedFlight.airline.iata
+              )}&limit=1`
+            );
             if (response.ok) {
               const data = await response.json();
-              const airline = data.airlines?.find((a: Airline) => a.iata === selectedFlight.airline.iata);
+              const airline = data.airlines?.find(
+                (a: Airline) => a.iata === selectedFlight.airline.iata
+              );
               if (airline) {
                 setSelectedAirline(airline);
               }
@@ -120,15 +125,21 @@ export const AddFlightForm = ({
         };
         fetchAirline();
       }
-      
+
       // Fetch and set selected origin airport
       if (selectedFlight.departure.iata) {
         const fetchOriginAirport = async () => {
           try {
-            const response = await apiClient.get(`/v1/airports?q=${encodeURIComponent(selectedFlight.departure.iata)}&limit=1`);
+            const response = await apiClient.get(
+              `/v1/airports?q=${encodeURIComponent(
+                selectedFlight.departure.iata
+              )}&limit=1`
+            );
             if (response.ok) {
               const data = await response.json();
-              const airport = data.airports?.find((a: Airport) => a.iata_code === selectedFlight.departure.iata);
+              const airport = data.airports?.find(
+                (a: Airport) => a.iata_code === selectedFlight.departure.iata
+              );
               if (airport) {
                 setSelectedOriginAirport(airport);
               }
@@ -139,15 +150,21 @@ export const AddFlightForm = ({
         };
         fetchOriginAirport();
       }
-      
+
       // Fetch and set selected destination airport
       if (selectedFlight.arrival.iata) {
         const fetchDestinationAirport = async () => {
           try {
-            const response = await apiClient.get(`/v1/airports?q=${encodeURIComponent(selectedFlight.arrival.iata)}&limit=1`);
+            const response = await apiClient.get(
+              `/v1/airports?q=${encodeURIComponent(
+                selectedFlight.arrival.iata
+              )}&limit=1`
+            );
             if (response.ok) {
               const data = await response.json();
-              const airport = data.airports?.find((a: Airport) => a.iata_code === selectedFlight.arrival.iata);
+              const airport = data.airports?.find(
+                (a: Airport) => a.iata_code === selectedFlight.arrival.iata
+              );
               if (airport) {
                 setSelectedDestinationAirport(airport);
               }
@@ -158,7 +175,7 @@ export const AddFlightForm = ({
         };
         fetchDestinationAirport();
       }
-      
+
       setShowManualEntry(false);
     }
   }, [selectedFlight]);
@@ -374,7 +391,6 @@ export const AddFlightForm = ({
           disabled={loading}
           label="Destination Airport"
         />
-
         <div className="grid grid-cols-2 gap-4">
           <SelectField
             id="role"

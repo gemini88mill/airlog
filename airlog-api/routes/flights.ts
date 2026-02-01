@@ -30,172 +30,173 @@ export const flightsRoutes = {
   "/v1/flights": async (req: Request) => {
     const url = new URL(req.url);
 
-    if (req.method === HTTPMethods.POST) {
-      try {
-        const data = (await req.json().catch(() => ({}))) as Record<
-          string,
-          unknown
-        >;
+    switch (req.method) {
+      case HTTPMethods.POST: {
+        try {
+          const data = (await req.json().catch(() => ({}))) as Record<
+            string,
+            unknown
+          >;
 
-        // Validate required fields
-        if (!data.flight_date || !data.flight_number || !data.user_id) {
-          return Response.json(
-            {
-              error:
-                "Missing required fields: flight_date, flight_number, user_id",
-            },
-            { status: 400 }
-          );
-        }
-
-        const rawFlightNumber = data.flight_number as string;
-        // Extract just the numeric part and convert to integer (e.g., "DL296" -> 296)
-        const flightNumberNumeric = extractFlightNumber(rawFlightNumber);
-
-        if (flightNumberNumeric === null) {
-          return Response.json(
-            {
-              error:
-                "Invalid flight number. Could not extract a valid numeric flight number.",
-            },
-            { status: 400 }
-          );
-        }
-
-        const flightData: TablesInsert<"flights"> = {
-          flight_date: data.flight_date as string,
-          flight_number: flightNumberNumeric,
-          user_id: data.user_id as string,
-          airline_iata: (data.airline_iata as string) || null,
-          destination_iata: (data.destination_iata as string) || null,
-          origin_iata: (data.origin_iata as string) || null,
-          note: (data.note as string) || null,
-          circle_id: (data.circle_id as string) || null,
-          role: (data.role as "passenger" | "crew") || "passenger",
-          visibility: (data.visibility as "private" | "shared") || "private",
-        };
-
-        const { data: flight, error } = await supabase
-          .from("flights")
-          .insert(flightData)
-          .select()
-          .single();
-
-        if (error) {
-          return Response.json({ error: error.message }, { status: 400 });
-        }
-
-        // Upsert route if all required fields are present
-        if (
-          flightData.airline_iata &&
-          flightData.origin_iata &&
-          flightData.destination_iata
-        ) {
-          try {
-            // Check if route already exists
-            const { data: existingRoute, error: findError } = await supabase
-              .from("routes")
-              .select("id")
-              .eq("airline_code", flightData.airline_iata)
-              .eq("source_airport_code", flightData.origin_iata)
-              .eq("destination_airport_code", flightData.destination_iata)
-              .maybeSingle();
-
-            if (findError) {
-              console.error("Error finding route:", findError);
-              // Continue without failing the flight creation
-            } else if (existingRoute) {
-              // Update existing route
-              const routeUpdate: TablesUpdate<"routes"> = {
-                flight_num: rawFlightNumber,
-                updated_at: new Date().toISOString(),
-              };
-
-              const { error: updateError } = await supabase
-                .from("routes")
-                .update(routeUpdate)
-                .eq("id", existingRoute.id);
-
-              if (updateError) {
-                console.error("Error updating route:", updateError);
-                // Continue without failing the flight creation
-              }
-            } else {
-              // Create new route
-              const routeData: TablesInsert<"routes"> = {
-                airline_code: flightData.airline_iata,
-                source_airport_code: flightData.origin_iata,
-                destination_airport_code: flightData.destination_iata,
-                flight_num: rawFlightNumber,
-              };
-
-              const { error: insertError } = await supabase
-                .from("routes")
-                .insert(routeData);
-
-              if (insertError) {
-                console.error("Error inserting route:", insertError);
-                // Continue without failing the flight creation
-              }
-            }
-          } catch (routeError) {
-            console.error("Error upserting route:", routeError);
-            // Continue without failing the flight creation
+          // Validate required fields
+          if (!data.flight_date || !data.flight_number || !data.user_id) {
+            return Response.json(
+              {
+                error:
+                  "Missing required fields: flight_date, flight_number, user_id",
+              },
+              { status: 400 }
+            );
           }
-        }
 
-        return Response.json(
-          {
-            message: "Flight added",
-            data: flight,
-          },
-          { status: 201 }
-        );
-      } catch (error) {
-        return Response.json(
-          { error: "Failed to process request" },
-          { status: 500 }
-        );
+          const rawFlightNumber = data.flight_number as string;
+          // Extract just the numeric part and convert to integer (e.g., "DL296" -> 296)
+          const flightNumberNumeric = extractFlightNumber(rawFlightNumber);
+
+          if (flightNumberNumeric === null) {
+            return Response.json(
+              {
+                error:
+                  "Invalid flight number. Could not extract a valid numeric flight number.",
+              },
+              { status: 400 }
+            );
+          }
+
+          const flightData: TablesInsert<"flights"> = {
+            flight_date: data.flight_date as string,
+            flight_number: flightNumberNumeric,
+            user_id: data.user_id as string,
+            airline_iata: (data.airline_iata as string) || null,
+            destination_iata: (data.destination_iata as string) || null,
+            origin_iata: (data.origin_iata as string) || null,
+            note: (data.note as string) || null,
+            circle_id: (data.circle_id as string) || null,
+            role: (data.role as "passenger" | "crew") || "passenger",
+            visibility: (data.visibility as "private" | "shared") || "private",
+          };
+
+          const { data: flight, error } = await supabase
+            .from("flights")
+            .insert(flightData)
+            .select()
+            .single();
+
+          if (error) {
+            return Response.json({ error: error.message }, { status: 400 });
+          }
+
+          // Upsert route if all required fields are present
+          if (
+            flightData.airline_iata &&
+            flightData.origin_iata &&
+            flightData.destination_iata
+          ) {
+            try {
+              // Check if route already exists
+              const { data: existingRoute, error: findError } = await supabase
+                .from("routes")
+                .select("id")
+                .eq("airline_code", flightData.airline_iata)
+                .eq("source_airport_code", flightData.origin_iata)
+                .eq("destination_airport_code", flightData.destination_iata)
+                .maybeSingle();
+
+              if (findError) {
+                console.error("Error finding route:", findError);
+                // Continue without failing the flight creation
+              } else if (existingRoute) {
+                // Update existing route
+                const routeUpdate: TablesUpdate<"routes"> = {
+                  flight_num: rawFlightNumber,
+                  updated_at: new Date().toISOString(),
+                };
+
+                const { error: updateError } = await supabase
+                  .from("routes")
+                  .update(routeUpdate)
+                  .eq("id", existingRoute.id);
+
+                if (updateError) {
+                  console.error("Error updating route:", updateError);
+                  // Continue without failing the flight creation
+                }
+              } else {
+                // Create new route
+                const routeData: TablesInsert<"routes"> = {
+                  airline_code: flightData.airline_iata,
+                  source_airport_code: flightData.origin_iata,
+                  destination_airport_code: flightData.destination_iata,
+                  flight_num: rawFlightNumber,
+                };
+
+                const { error: insertError } = await supabase
+                  .from("routes")
+                  .insert(routeData);
+
+                if (insertError) {
+                  console.error("Error inserting route:", insertError);
+                  // Continue without failing the flight creation
+                }
+              }
+            } catch (routeError) {
+              console.error("Error upserting route:", routeError);
+              // Continue without failing the flight creation
+            }
+          }
+
+          return Response.json(
+            {
+              message: "Flight added",
+              data: flight,
+            },
+            { status: 201 }
+          );
+        } catch (error) {
+          return Response.json(
+            { error: "Failed to process request" },
+            { status: 500 }
+          );
+        }
       }
-    }
+      case HTTPMethods.GET: {
+        try {
+          const scope = url.searchParams.get("scope") || "mine";
+          const circleId = url.searchParams.get("circleId");
 
-    if (req.method === HTTPMethods.GET) {
-      try {
-        const scope = url.searchParams.get("scope") || "mine";
-        const circleId = url.searchParams.get("circleId");
+          let query = supabase.from("flights").select("*");
 
-        let query = supabase.from("flights").select("*");
+          // Apply scope filtering if needed
+          if (scope === "circle" && circleId) {
+            query = query.eq("circle_id", circleId);
+          } else if (scope === "shared") {
+            query = query.eq("visibility", "shared");
+          }
+          // For "mine" scope, you might want to filter by user_id from auth token
+          // For now, we'll return all flights
 
-        // Apply scope filtering if needed
-        if (scope === "circle" && circleId) {
-          query = query.eq("circle_id", circleId);
-        } else if (scope === "shared") {
-          query = query.eq("visibility", "shared");
+          const { data: flights, error } = await query.order("flight_date", {
+            ascending: false,
+          });
+
+          if (error) {
+            return Response.json({ error: error.message }, { status: 400 });
+          }
+
+          return Response.json({
+            scope,
+            circleId,
+            flights: flights || [],
+          });
+        } catch (error) {
+          return Response.json(
+            { error: "Failed to fetch flights" },
+            { status: 500 }
+          );
         }
-        // For "mine" scope, you might want to filter by user_id from auth token
-        // For now, we'll return all flights
-
-        const { data: flights, error } = await query.order("flight_date", {
-          ascending: false,
-        });
-
-        if (error) {
-          return Response.json({ error: error.message }, { status: 400 });
-        }
-
-        return Response.json({
-          scope,
-          circleId,
-          flights: flights || [],
-        });
-      } catch (error) {
-        return Response.json(
-          { error: "Failed to fetch flights" },
-          { status: 500 }
-        );
       }
+      default:
+        return new Response("Method not allowed", { status: 405 });
     }
-
-    return new Response("Method not allowed", { status: 405 });
   },
 };
