@@ -1,3 +1,4 @@
+import { HTTPMethods } from "../HTTPMethods";
 import { supabase } from "../supabaseClient";
 
 const isString = (value: unknown): value is string => {
@@ -11,7 +12,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> => {
 export const authRoutes = {
   // POST /v1/auth/login → login with email and password
   "/v1/auth/login": async (req: Request) => {
-    if (req.method !== "POST") {
+    if (req.method !== HTTPMethods.POST) {
       return new Response("Method not allowed", { status: 405 });
     }
 
@@ -69,7 +70,7 @@ export const authRoutes = {
 
   // POST /v1/auth/logout → logout current user
   "/v1/auth/logout": async (req: Request) => {
-    if (req.method !== "POST") {
+    if (req.method !== HTTPMethods.POST) {
       return new Response("Method not allowed", { status: 405 });
     }
 
@@ -106,7 +107,7 @@ export const authRoutes = {
 
   // GET /v1/auth/session → get current session
   "/v1/auth/session": async (req: Request) => {
-    if (req.method !== "GET") {
+    if (req.method !== HTTPMethods.GET) {
       return new Response("Method not allowed", { status: 405 });
     }
 

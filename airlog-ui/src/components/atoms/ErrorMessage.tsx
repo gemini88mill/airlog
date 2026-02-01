@@ -3,7 +3,10 @@ type ErrorMessageProps = {
   className?: string;
 };
 
-export const ErrorMessage = ({ message, className = '' }: ErrorMessageProps) => {
+export const ErrorMessage = ({
+  message,
+  className = "",
+}: ErrorMessageProps) => {
   return (
     <div
       role="alert"

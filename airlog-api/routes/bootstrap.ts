@@ -1,3 +1,4 @@
+import { HTTPMethods } from "../HTTPMethods";
 import { supabase } from "../supabaseClient";
 
 const isString = (value: unknown): value is string => {
@@ -23,7 +24,7 @@ const getAuthenticatedUser = async (req: Request) => {
 export const bootstrapRoutes = {
   // GET /v1/bootstrap → get all essential user data for app initialization
   "/v1/bootstrap": async (req: Request) => {
-    if (req.method !== "GET") {
+    if (req.method !== HTTPMethods.GET) {
       return new Response("Method not allowed", { status: 405 });
     }
 

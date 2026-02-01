@@ -1,6 +1,6 @@
-import { auth } from '../lib/auth';
-import { LoginForm } from './organisms/LoginForm';
-import { Card } from './organisms/Card';
+import { auth } from "../lib/auth";
+import { LoginForm } from "./organisms/LoginForm";
+import { Card } from "./organisms/Card";
 
 export const Login = () => {
   const handleLogin = async (email: string, password: string) => {

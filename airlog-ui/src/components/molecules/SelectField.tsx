@@ -1,5 +1,5 @@
-import { Field, Select } from '@headlessui/react';
-import { Label } from '../atoms/Label';
+import { Field, Select } from "@headlessui/react";
+import { Label } from "../atoms/Label";
 
 type SelectFieldProps = {
   id?: string;
@@ -20,13 +20,11 @@ export const SelectField = ({
   options,
   required = false,
   disabled = false,
-  className = '',
+  className = "",
 }: SelectFieldProps) => {
   return (
     <Field disabled={disabled} className={`mb-4 ${className}`}>
-      <Label required={required}>
-        {label}
-      </Label>
+      <Label required={required}>{label}</Label>
       <Select
         id={id}
         value={value}

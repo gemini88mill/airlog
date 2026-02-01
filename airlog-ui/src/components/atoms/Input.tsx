@@ -1,8 +1,8 @@
-import { Input as HeadlessInput } from '@headlessui/react';
-import type { ComponentProps } from 'react';
+import { Input as HeadlessInput } from "@headlessui/react";
+import type { ComponentProps } from "react";
 
 type InputProps = {
-  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
+  type?: "text" | "email" | "password" | "number" | "tel" | "url";
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
@@ -10,16 +10,16 @@ type InputProps = {
   disabled?: boolean;
   className?: string;
   autoComplete?: string;
-} & Omit<ComponentProps<typeof HeadlessInput>, 'value' | 'onChange' | 'type'>;
+} & Omit<ComponentProps<typeof HeadlessInput>, "value" | "onChange" | "type">;
 
 export const Input = ({
-  type = 'text',
+  type = "text",
   value,
   onChange,
   placeholder,
   required = false,
   disabled = false,
-  className = '',
+  className = "",
   ...props
 }: InputProps) => {
   return (

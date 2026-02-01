@@ -1,9 +1,10 @@
+import { HTTPMethods } from "../HTTPMethods";
 import { supabase } from "../supabaseClient";
 
 export const airlinesRoutes = {
   // GET /v1/airlines → get all airlines
   "/v1/airlines": async (req: Request) => {
-    if (req.method === "GET") {
+    if (req.method === HTTPMethods.GET) {
       try {
         const url = new URL(req.url);
         const query = url.searchParams.get("q") || "";

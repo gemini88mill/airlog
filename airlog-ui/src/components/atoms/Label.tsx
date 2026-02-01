@@ -1,16 +1,16 @@
-import { Label as HeadlessLabel } from '@headlessui/react';
-import type { ComponentProps } from 'react';
+import { Label as HeadlessLabel } from "@headlessui/react";
+import type { ComponentProps } from "react";
 
 type LabelProps = {
   children: React.ReactNode;
   required?: boolean;
   className?: string;
-} & Omit<ComponentProps<typeof HeadlessLabel>, 'children'>;
+} & Omit<ComponentProps<typeof HeadlessLabel>, "children">;
 
 export const Label = ({
   children,
   required = false,
-  className = '',
+  className = "",
   ...props
 }: LabelProps) => {
   return (

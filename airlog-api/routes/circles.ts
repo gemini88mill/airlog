@@ -1,9 +1,10 @@
 import type { BunRequest } from "bun";
+import { HTTPMethods } from "../HTTPMethods";
 
 export const circlesRoutes = {
   // POST /v1/circles → create circle + add owner member
   "/v1/circles": async (req: Request) => {
-    if (req.method === "POST") {
+    if (req.method === HTTPMethods.POST) {
       const data = await req.json().catch(() => ({}));
       return Response.json({ 
         message: "Circle created and owner member added",
@@ -14,7 +15,7 @@ export const circlesRoutes = {
   },
   // GET /v1/circles/me → list circles I'm in
   "/v1/circles/me": async (req: Request) => {
-    if (req.method === "GET") {
+    if (req.method === HTTPMethods.GET) {
       return Response.json({ 
         circles: [] 
       });
@@ -26,7 +27,7 @@ export const circlesRoutes = {
   "/v1/circles/:circleId/members": async (req: BunRequest<"/v1/circles/:circleId/members">) => {
     const { circleId } = req.params;
     
-    if (req.method === "POST") {
+    if (req.method === HTTPMethods.POST) {
       const data = await req.json().catch(() => ({}));
       return Response.json({ 
         message: `Member added to circle ${circleId}`,
@@ -34,7 +35,7 @@ export const circlesRoutes = {
         data 
       }, { status: 201 });
     }
-    if (req.method === "GET") {
+    if (req.method === HTTPMethods.GET) {
       return Response.json({ 
         circleId,
         members: [] 

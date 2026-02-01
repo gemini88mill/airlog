@@ -1,5 +1,6 @@
 import { supabase } from "../supabaseClient";
-import type { TablesInsert } from "../database.types";
+import { HTTPMethods } from "../HTTPMethods";
+import type { TablesInsert, TablesUpdate } from "../database.types";
 
 // Helper function to extract just the numeric part from flight number and convert to integer
 // Examples: "DL296" -> 296, "DL 296" -> 296, "AA1234" -> 1234, "296" -> 296
@@ -8,18 +9,18 @@ const extractFlightNumber = (flightNumber: string): number | null => {
   // Then extract the numeric part
   const cleaned = flightNumber.replace(/^[A-Z]{2,3}\s*/i, "").trim();
   const numericMatch = cleaned.match(/\d+/);
-  
+
   if (!numericMatch) {
     return null;
   }
-  
+
   const numericValue = parseInt(numericMatch[0], 10);
-  
+
   // Validate it's a valid integer
   if (isNaN(numericValue)) {
     return null;
   }
-  
+
   return numericValue;
 };
 
@@ -28,15 +29,21 @@ export const flightsRoutes = {
   // GET /v1/flights?scope=mine|shared|circle&circleId=...
   "/v1/flights": async (req: Request) => {
     const url = new URL(req.url);
-    
-    if (req.method === "POST") {
+
+    if (req.method === HTTPMethods.POST) {
       try {
-        const data = await req.json().catch(() => ({})) as Record<string, unknown>;
-        
+        const data = (await req.json().catch(() => ({}))) as Record<
+          string,
+          unknown
+        >;
+
         // Validate required fields
         if (!data.flight_date || !data.flight_number || !data.user_id) {
           return Response.json(
-            { error: "Missing required fields: flight_date, flight_number, user_id" },
+            {
+              error:
+                "Missing required fields: flight_date, flight_number, user_id",
+            },
             { status: 400 }
           );
         }
@@ -47,7 +54,10 @@ export const flightsRoutes = {
 
         if (flightNumberNumeric === null) {
           return Response.json(
-            { error: "Invalid flight number. Could not extract a valid numeric flight number." },
+            {
+              error:
+                "Invalid flight number. Could not extract a valid numeric flight number.",
+            },
             { status: 400 }
           );
         }
@@ -72,16 +82,72 @@ export const flightsRoutes = {
           .single();
 
         if (error) {
-          return Response.json(
-            { error: error.message },
-            { status: 400 }
-          );
+          return Response.json({ error: error.message }, { status: 400 });
+        }
+
+        // Upsert route if all required fields are present
+        if (
+          flightData.airline_iata &&
+          flightData.origin_iata &&
+          flightData.destination_iata
+        ) {
+          try {
+            // Check if route already exists
+            const { data: existingRoute, error: findError } = await supabase
+              .from("routes")
+              .select("id")
+              .eq("airline_code", flightData.airline_iata)
+              .eq("source_airport_code", flightData.origin_iata)
+              .eq("destination_airport_code", flightData.destination_iata)
+              .maybeSingle();
+
+            if (findError) {
+              console.error("Error finding route:", findError);
+              // Continue without failing the flight creation
+            } else if (existingRoute) {
+              // Update existing route
+              const routeUpdate: TablesUpdate<"routes"> = {
+                flight_num: rawFlightNumber,
+                updated_at: new Date().toISOString(),
+              };
+
+              const { error: updateError } = await supabase
+                .from("routes")
+                .update(routeUpdate)
+                .eq("id", existingRoute.id);
+
+              if (updateError) {
+                console.error("Error updating route:", updateError);
+                // Continue without failing the flight creation
+              }
+            } else {
+              // Create new route
+              const routeData: TablesInsert<"routes"> = {
+                airline_code: flightData.airline_iata,
+                source_airport_code: flightData.origin_iata,
+                destination_airport_code: flightData.destination_iata,
+                flight_num: rawFlightNumber,
+              };
+
+              const { error: insertError } = await supabase
+                .from("routes")
+                .insert(routeData);
+
+              if (insertError) {
+                console.error("Error inserting route:", insertError);
+                // Continue without failing the flight creation
+              }
+            }
+          } catch (routeError) {
+            console.error("Error upserting route:", routeError);
+            // Continue without failing the flight creation
+          }
         }
 
         return Response.json(
-          { 
+          {
             message: "Flight added",
-            data: flight 
+            data: flight,
           },
           { status: 201 }
         );
@@ -92,8 +158,8 @@ export const flightsRoutes = {
         );
       }
     }
-    
-    if (req.method === "GET") {
+
+    if (req.method === HTTPMethods.GET) {
       try {
         const scope = url.searchParams.get("scope") || "mine";
         const circleId = url.searchParams.get("circleId");
@@ -109,19 +175,18 @@ export const flightsRoutes = {
         // For "mine" scope, you might want to filter by user_id from auth token
         // For now, we'll return all flights
 
-        const { data: flights, error } = await query.order("flight_date", { ascending: false });
+        const { data: flights, error } = await query.order("flight_date", {
+          ascending: false,
+        });
 
         if (error) {
-          return Response.json(
-            { error: error.message },
-            { status: 400 }
-          );
+          return Response.json({ error: error.message }, { status: 400 });
         }
 
         return Response.json({
           scope,
           circleId,
-          flights: flights || []
+          flights: flights || [],
         });
       } catch (error) {
         return Response.json(
@@ -130,7 +195,7 @@ export const flightsRoutes = {
         );
       }
     }
-    
+
     return new Response("Method not allowed", { status: 405 });
   },
 };
