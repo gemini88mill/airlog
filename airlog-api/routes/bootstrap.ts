@@ -1,10 +1,6 @@
 import { HTTPMethods } from "../HTTPMethods";
 import { supabase } from "../supabaseClient";
 
-const isString = (value: unknown): value is string => {
-  return typeof value === "string";
-};
-
 const getAuthenticatedUser = async (req: Request) => {
   const authHeader = req.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) {
@@ -180,6 +176,7 @@ export const bootstrapRoutes = {
         },
       });
     } catch (error) {
+      console.error("Error bootstrapping user data:", error);
       return Response.json(
         { error: "Failed to bootstrap user data" },
         { status: 500 }

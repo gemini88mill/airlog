@@ -115,6 +115,7 @@ export const flightsRoutes = {
             { status: 201 }
           );
         } catch (error) {
+          console.error("Error processing flight request:", error);
           return Response.json(
             { error: "Failed to process request" },
             { status: 500 }
@@ -151,6 +152,7 @@ export const flightsRoutes = {
             flights: flights || [],
           });
         } catch (error) {
+          console.error("Error fetching flights:", error);
           return Response.json(
             { error: "Failed to fetch flights" },
             { status: 500 }

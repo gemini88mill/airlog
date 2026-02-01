@@ -32,7 +32,14 @@ const addCorsHeaders = (response: Response, origin: string | null): Response => 
   });
 };
 
-const allRoutes: Record<string, (req: Request | any) => Response | Promise<Response>> = {
+type RouteRequest = Request & {
+  params?: Record<string, string>;
+  cookies?: Record<string, string>;
+};
+
+type RouteHandler = (req: Request) => Response | Promise<Response>;
+
+const allRoutes = {
   "/": () => new Response("Welcome to Bun!"),
   "/abc": () => Response.redirect("/source", 301),
   "/source": () => new Response(Bun.file(import.meta.path)),
@@ -49,7 +56,7 @@ const allRoutes: Record<string, (req: Request | any) => Response | Promise<Respo
   ...airlinesRoutes,
   ...airportsRoutes,
   ...routesRoutes,
-};
+} as unknown as Record<string, RouteHandler>;
 
 const server = Bun.serve({
   fetch: async (req) => {
@@ -76,6 +83,7 @@ const server = Bun.serve({
         const response = await exactHandler(req);
         return addCorsHeaders(response, origin);
       } catch (error) {
+        console.error("Error handling route:", error);
         const errorResponse = Response.json(
           { error: "Internal server error" },
           { status: 500 }
@@ -101,12 +109,16 @@ const server = Bun.serve({
           });
 
           // Create a request-like object with params (for BunRequest compatibility)
-          const reqWithParams = Object.assign(req, { params, cookies: {} });
+          const reqWithParams = Object.assign(req, {
+            params,
+            cookies: {},
+          }) as RouteRequest;
           
           try {
             const response = await handler(reqWithParams);
             return addCorsHeaders(response, origin);
           } catch (error) {
+            console.error("Error handling param route:", error);
             const errorResponse = Response.json(
               { error: "Internal server error" },
               { status: 500 }

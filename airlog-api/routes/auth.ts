@@ -61,6 +61,7 @@ export const authRoutes = {
         },
       });
     } catch (error) {
+      console.error("Error processing login request:", error);
       return Response.json(
         { error: "Failed to process login request" },
         { status: 500 }
@@ -98,6 +99,7 @@ export const authRoutes = {
       // Supabase tokens are stateless JWTs, so there's no server-side session to invalidate
       return Response.json({ message: "Logged out successfully" });
     } catch (error) {
+      console.error("Error processing logout request:", error);
       return Response.json(
         { error: "Failed to process logout request" },
         { status: 500 }
@@ -137,6 +139,7 @@ export const authRoutes = {
         },
       });
     } catch (error) {
+      console.error("Error processing session request:", error);
       return Response.json(
         { user: null, session: null }
       );

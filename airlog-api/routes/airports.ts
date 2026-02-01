@@ -36,6 +36,7 @@ export const airportsRoutes = {
           airports: airports || [],
         });
       } catch (error) {
+        console.error("Error fetching airports:", error);
         return Response.json(
           { error: "Failed to fetch airports" },
           { status: 500 }
