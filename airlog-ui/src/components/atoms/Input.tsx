@@ -1,16 +1,20 @@
 import { Input as HeadlessInput } from "@headlessui/react";
-import type { ComponentProps } from "react";
+import type { InputProps as HeadlessInputProps } from "@headlessui/react";
+import type { ChangeEvent } from "react";
 
 type InputProps = {
   type?: "text" | "email" | "password" | "number" | "tel" | "url";
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   required?: boolean;
   disabled?: boolean;
   className?: string;
   autoComplete?: string;
-} & Omit<ComponentProps<typeof HeadlessInput>, "value" | "onChange" | "type">;
+} & Omit<
+  HeadlessInputProps<"input">,
+  "as" | "value" | "onChange" | "type"
+>;
 
 export const Input = ({
   type = "text",
@@ -24,6 +28,7 @@ export const Input = ({
 }: InputProps) => {
   return (
     <HeadlessInput
+      as="input"
       type={type}
       value={value}
       onChange={onChange}
