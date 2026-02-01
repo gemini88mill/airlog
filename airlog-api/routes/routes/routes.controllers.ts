@@ -1,22 +1,5 @@
-import { supabase } from "../supabaseClient";
-import { HTTPMethods } from "../HTTPMethods";
-import { upsertRouteByAirlineAndAirports, upsertRoutesBulk } from "./routeUpsert";
-
-const normalizeFlightNumber = (flightNumber: string): string => {
-  return flightNumber.replace(/\s+/g, "").toUpperCase();
-};
-
-const parseFlightNumber = (
-  flightNumber: string
-): { airlineCode: string; number: string } | null => {
-  const normalized = normalizeFlightNumber(flightNumber);
-  const match = normalized.match(/^([A-Z]{2,3})(\d+)$/);
-  if (!match || !match[1] || !match[2]) {
-    return null;
-  }
-
-  return { airlineCode: match[1], number: match[2] };
-};
+import { HTTPMethods } from "../../HTTPMethods";
+import { lookupRoute, upsertRoute, upsertRoutesInBulk } from "./routes.service";
 
 export const routesRoutes = {
   // GET /v1/routes/lookup?flightNumber=DL295
@@ -38,79 +21,16 @@ export const routesRoutes = {
         );
       }
 
-      const normalized = normalizeFlightNumber(flightNumber);
-      const candidates =
-        normalized === flightNumber ? [normalized] : [flightNumber, normalized];
+      const result = await lookupRoute(flightNumber);
 
-      const { data: routeMatch, error: routeError } = await supabase
-        .from("routes")
-        .select(
-          "airline_code, source_airport_code, destination_airport_code, flight_num"
-        )
-        .in("flight_num", candidates)
-        .maybeSingle();
-
-      if (routeError) {
-        return Response.json({ error: routeError.message }, { status: 400 });
-      }
-
-      if (!routeMatch) {
-        const parsed = parseFlightNumber(flightNumber);
-        if (parsed) {
-          const { data: parsedRoute, error: parsedError } = await supabase
-            .from("routes")
-            .select(
-              "airline_code, source_airport_code, destination_airport_code, flight_num"
-            )
-            .eq("airline_code", parsed.airlineCode)
-            .eq("flight_num", parsed.number)
-            .maybeSingle();
-
-          if (parsedError) {
-            return Response.json(
-              { error: parsedError.message },
-              { status: 400 }
-            );
-          }
-
-          if (parsedRoute) {
-            return Response.json({
-              data: {
-                flight_number: parsedRoute.flight_num || normalized,
-                flight_date: null,
-                user_id: null,
-                airline_iata: parsedRoute.airline_code,
-                origin_iata: parsedRoute.source_airport_code,
-                destination_iata: parsedRoute.destination_airport_code,
-                role: "passenger",
-                visibility: "private",
-                circle_id: null,
-                note: null,
-              },
-            });
-          }
-        }
-
+      if ("error" in result) {
         return Response.json(
-          { error: "Route not found for flight number" },
-          { status: 404 }
+          { error: result.error },
+          { status: result.status }
         );
       }
 
-      return Response.json({
-        data: {
-          flight_number: routeMatch.flight_num || normalized,
-          flight_date: null,
-          user_id: null,
-          airline_iata: routeMatch.airline_code,
-          origin_iata: routeMatch.source_airport_code,
-          destination_iata: routeMatch.destination_airport_code,
-          role: "passenger",
-          visibility: "private",
-          circle_id: null,
-          note: null,
-        },
-      });
+      return Response.json(result.data);
     } catch (error) {
       console.error("Error looking up route:", error);
       return Response.json(
@@ -146,18 +66,21 @@ export const routesRoutes = {
         );
       }
 
-      const { error } = await upsertRouteByAirlineAndAirports({
+      const result = await upsertRoute({
         airlineIata,
         originIata,
         destinationIata,
         flightNumber,
       });
 
-      if (error) {
-        return Response.json({ error }, { status: 400 });
+      if ("error" in result) {
+        return Response.json(
+          { error: result.error },
+          { status: result.status }
+        );
       }
 
-      return Response.json({ message: "Route upserted" });
+      return Response.json(result.data);
     } catch (error) {
       console.error("Error upserting route:", error);
       return Response.json({ error: "Failed to upsert route" }, { status: 500 });
@@ -210,12 +133,16 @@ export const routesRoutes = {
         );
       }
 
-      const result = await upsertRoutesBulk(normalizedRoutes);
+      const result = await upsertRoutesInBulk(normalizedRoutes);
 
-      return Response.json({
-        message: "Routes upserted",
-        ...result,
-      });
+      if ("error" in result) {
+        return Response.json(
+          { error: result.error },
+          { status: result.status }
+        );
+      }
+
+      return Response.json(result.data);
     } catch (error) {
       console.error("Error bulk upserting routes:", error);
       return Response.json(

@@ -1,23 +1,23 @@
-import { supabase } from "../supabaseClient";
-import type { TablesInsert, TablesUpdate } from "../database.types";
+import { supabase } from "../../supabaseClient";
+import type { TablesInsert, TablesUpdate } from "../../database.types";
 
-type UpsertRouteInput = {
+interface UpsertRouteInput {
   airlineIata: string;
   originIata: string;
   destinationIata: string;
   flightNumber: string;
-};
+}
 
-type RouteLookupMaps = {
+interface RouteLookupMaps {
   airlineByIata: Map<string, number>;
   airportByIata: Map<string, number>;
-};
+}
 
-type RouteIds = {
+interface RouteIds {
   airlineId: number;
   originId: number;
   destinationId: number;
-};
+}
 
 const resolveRouteIds = async (
   input: UpsertRouteInput,
@@ -43,12 +43,27 @@ const resolveRouteIds = async (
     return { airlineId, originId, destinationId };
   }
 
-  const [{ data: airline, error: airlineError }, { data: origin, error: originError }, { data: destination, error: destinationError }] =
-    await Promise.all([
-      supabase.from("airlines").select("id, iata").eq("iata", airlineIata).maybeSingle(),
-      supabase.from("airports").select("id, iata_code").eq("iata_code", originIata).maybeSingle(),
-      supabase.from("airports").select("id, iata_code").eq("iata_code", destinationIata).maybeSingle(),
-    ]);
+  const [
+    { data: airline, error: airlineError },
+    { data: origin, error: originError },
+    { data: destination, error: destinationError },
+  ] = await Promise.all([
+    supabase
+      .from("airlines")
+      .select("id, iata")
+      .eq("iata", airlineIata)
+      .maybeSingle(),
+    supabase
+      .from("airports")
+      .select("id, iata_code")
+      .eq("iata_code", originIata)
+      .maybeSingle(),
+    supabase
+      .from("airports")
+      .select("id, iata_code")
+      .eq("iata_code", destinationIata)
+      .maybeSingle(),
+  ]);
 
   if (airlineError) {
     return { error: airlineError.message };
@@ -144,11 +159,11 @@ export const upsertRouteByAirlineAndAirports = async (
   return {};
 };
 
-type BulkUpsertResult = {
+interface BulkUpsertResult {
   upserted: number;
   skipped: number;
   errors: string[];
-};
+}
 
 export const upsertRoutesBulk = async (
   routes: UpsertRouteInput[]

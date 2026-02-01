@@ -1,11 +1,11 @@
-import { flightsRoutes } from "./routes/flights";
-import { circlesRoutes } from "./routes/circles";
-import { authRoutes } from "./routes/auth";
-import { bootstrapRoutes } from "./routes/bootstrap";
-import { airlinesRoutes } from "./routes/airlines";
-import { airportsRoutes } from "./routes/airports";
-import { routesRoutes } from "./routes/routes";
-import { aviationStackRoutes } from "./routes/aviationStack";
+import { flightsRoutes } from "./routes/flights/flights.controllers";
+import { circlesRoutes } from "./routes/circles/circles.controllers";
+import { authRoutes } from "./routes/auth/auth.controllers";
+import { bootstrapRoutes } from "./routes/bootstrap/bootstrap.controllers";
+import { airlinesRoutes } from "./routes/airlines/airlines.controllers";
+import { airportsRoutes } from "./routes/airports/airports.controllers";
+import { routesRoutes } from "./routes/routes/routes.controllers";
+import { aviationStackRoutes } from "./routes/aviationStack/aviationStack.controllers";
 
 const ALLOWED_ORIGINS = [
   "http://localhost:5137",
