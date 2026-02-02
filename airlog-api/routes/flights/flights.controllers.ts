@@ -1,4 +1,5 @@
 import { HTTPMethods } from "../../HTTPMethods";
+import type { ResponseError } from "../../lib/responseError";
 import { createFlight, listFlights } from "./flights.service";
 
 export const flightsRoutes = {
@@ -19,10 +20,8 @@ export const flightsRoutes = {
 
           const [created, error] = result;
           if (error) {
-            return Response.json(
-              { error: error.message },
-              { status: error.status }
-            );
+            const errorPayload: ResponseError = { error: error.message };
+            return Response.json(errorPayload, { status: error.status });
           }
 
           return Response.json(created, { status: 201 });
@@ -43,10 +42,8 @@ export const flightsRoutes = {
 
           const [data, error] = result;
           if (error) {
-            return Response.json(
-              { error: error.message },
-              { status: error.status }
-            );
+            const errorPayload: ResponseError = { error: error.message };
+            return Response.json(errorPayload, { status: error.status });
           }
 
           return Response.json(data);

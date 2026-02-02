@@ -1,5 +1,6 @@
 import type { BunRequest } from "bun";
 import { HTTPMethods } from "../../HTTPMethods";
+import type { ResponseError } from "../../lib/responseError";
 import {
   addCircleMember,
   createCircle,
@@ -16,10 +17,8 @@ export const circlesRoutes = {
 
       const [created, error] = result;
       if (error) {
-        return Response.json(
-          { error: error.message },
-          { status: error.status }
-        );
+        const errorPayload: ResponseError = { error: error.message };
+        return Response.json(errorPayload, { status: error.status });
       }
 
       return Response.json(
@@ -39,10 +38,8 @@ export const circlesRoutes = {
 
       const [circles, error] = result;
       if (error) {
-        return Response.json(
-          { error: error.message },
-          { status: error.status }
-        );
+        const errorPayload: ResponseError = { error: error.message };
+        return Response.json(errorPayload, { status: error.status });
       }
 
       return Response.json({
@@ -67,10 +64,8 @@ export const circlesRoutes = {
 
       const [member, error] = result;
       if (error) {
-        return Response.json(
-          { error: error.message },
-          { status: error.status }
-        );
+        const errorPayload: ResponseError = { error: error.message };
+        return Response.json(errorPayload, { status: error.status });
       }
 
       return Response.json(
@@ -87,10 +82,8 @@ export const circlesRoutes = {
 
       const [members, error] = result;
       if (error) {
-        return Response.json(
-          { error: error.message },
-          { status: error.status }
-        );
+        const errorPayload: ResponseError = { error: error.message };
+        return Response.json(errorPayload, { status: error.status });
       }
 
       return Response.json({

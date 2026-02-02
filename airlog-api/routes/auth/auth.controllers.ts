@@ -1,4 +1,5 @@
 import { HTTPMethods } from "../../HTTPMethods";
+import type { ResponseError } from "../../lib/responseError";
 import {
   getSessionForToken,
   loginWithPassword,
@@ -34,38 +35,34 @@ export const authRoutes = {
       const data = await req.json().catch(() => ({}));
 
       if (!isRecord(data)) {
-        return Response.json(
-          { error: "Invalid request body" },
-          { status: 400 }
-        );
+        const errorPayload: ResponseError = { error: "Invalid request body" };
+        return Response.json(errorPayload, { status: 400 });
       }
 
       const body = data as Partial<AuthBody>;
 
       if (!isString(body.email) || !isString(body.password)) {
-        return Response.json(
-          { error: "Missing required fields: email, password" },
-          { status: 400 }
-        );
+        const errorPayload: ResponseError = {
+          error: "Missing required fields: email, password",
+        };
+        return Response.json(errorPayload, { status: 400 });
       }
 
       const result = await loginWithPassword(body.email, body.password);
 
       const [resultData, resultError] = result;
       if (resultError) {
-        return Response.json(
-          { error: resultError.message },
-          { status: resultError.status }
-        );
+        const errorPayload: ResponseError = { error: resultError.message };
+        return Response.json(errorPayload, { status: resultError.status });
       }
 
       return Response.json(resultData);
     } catch (error) {
       console.error("Error processing login request:", error);
-      return Response.json(
-        { error: "Failed to process login request" },
-        { status: 500 }
-      );
+      const errorPayload: ResponseError = {
+        error: "Failed to process login request",
+      };
+      return Response.json(errorPayload, { status: 500 });
     }
   },
 
@@ -78,29 +75,27 @@ export const authRoutes = {
     try {
       const token = getBearerToken(req);
       if (!token) {
-        return Response.json(
-          { error: "Missing or invalid authorization header" },
-          { status: 401 }
-        );
+        const errorPayload: ResponseError = {
+          error: "Missing or invalid authorization header",
+        };
+        return Response.json(errorPayload, { status: 401 });
       }
 
       const result = await logoutWithToken(token);
 
       const [resultData, resultError] = result;
       if (resultError) {
-        return Response.json(
-          { error: resultError.message },
-          { status: resultError.status }
-        );
+        const errorPayload: ResponseError = { error: resultError.message };
+        return Response.json(errorPayload, { status: resultError.status });
       }
 
       return Response.json(resultData);
     } catch (error) {
       console.error("Error processing logout request:", error);
-      return Response.json(
-        { error: "Failed to process logout request" },
-        { status: 500 }
-      );
+      const errorPayload: ResponseError = {
+        error: "Failed to process logout request",
+      };
+      return Response.json(errorPayload, { status: 500 });
     }
   },
 
@@ -120,10 +115,8 @@ export const authRoutes = {
 
       const [resultData, resultError] = result;
       if (resultError) {
-        return Response.json(
-          { error: resultError.message },
-          { status: resultError.status }
-        );
+        const errorPayload: ResponseError = { error: resultError.message };
+        return Response.json(errorPayload, { status: resultError.status });
       }
 
       return Response.json(resultData);

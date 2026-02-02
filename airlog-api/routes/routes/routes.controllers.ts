@@ -1,4 +1,5 @@
 import { HTTPMethods } from "../../HTTPMethods";
+import type { ResponseError } from "../../lib/responseError";
 import { lookupRoute, upsertRoute, upsertRoutesInBulk } from "./routes.service";
 
 export const routesRoutes = {
@@ -25,10 +26,8 @@ export const routesRoutes = {
 
       const [resultData, resultError] = result;
       if (resultError) {
-        return Response.json(
-          { error: resultError.message },
-          { status: resultError.status }
-        );
+        const errorPayload: ResponseError = { error: resultError.message };
+        return Response.json(errorPayload, { status: resultError.status });
       }
 
       return Response.json(resultData);
@@ -76,16 +75,15 @@ export const routesRoutes = {
 
       const [resultData, resultError] = result;
       if (resultError) {
-        return Response.json(
-          { error: resultError.message },
-          { status: resultError.status }
-        );
+        const errorPayload: ResponseError = { error: resultError.message };
+        return Response.json(errorPayload, { status: resultError.status });
       }
 
       return Response.json(resultData);
     } catch (error) {
       console.error("Error upserting route:", error);
-      return Response.json({ error: "Failed to upsert route" }, { status: 500 });
+      const errorPayload: ResponseError = { error: "Failed to upsert route" };
+      return Response.json(errorPayload, { status: 500 });
     }
   },
   // POST /v1/routes/bulk → bulk upsert routes
@@ -139,10 +137,8 @@ export const routesRoutes = {
 
       const [resultData, resultError] = result;
       if (resultError) {
-        return Response.json(
-          { error: resultError.message },
-          { status: resultError.status }
-        );
+        const errorPayload: ResponseError = { error: resultError.message };
+        return Response.json(errorPayload, { status: resultError.status });
       }
 
       return Response.json(resultData);

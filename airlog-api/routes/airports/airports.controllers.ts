@@ -1,4 +1,5 @@
 import { HTTPMethods } from "../../HTTPMethods";
+import type { ResponseError } from "../../lib/responseError";
 import { listAirports } from "./airports.service";
 
 const parseLimit = (value: string | null, fallback: number): number => {
@@ -25,7 +26,8 @@ export const airportsRoutes = {
 
       const [data, error] = result;
       if (error) {
-        return Response.json({ error: error.message }, { status: error.status });
+        const errorPayload: ResponseError = { error: error.message };
+        return Response.json(errorPayload, { status: error.status });
       }
 
       return Response.json(data);

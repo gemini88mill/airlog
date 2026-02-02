@@ -1,4 +1,5 @@
 import { HTTPMethods } from "../../HTTPMethods";
+import type { ResponseError } from "../../lib/responseError";
 import { getAviationStackFlights } from "./aviationStack.service";
 
 export const aviationStackRoutes = {
@@ -30,10 +31,8 @@ export const aviationStackRoutes = {
 
       const [data, error] = result;
       if (error) {
-        return Response.json(
-          { error: error.message },
-          { status: error.status }
-        );
+        const errorPayload: ResponseError = { error: error.message };
+        return Response.json(errorPayload, { status: error.status });
       }
 
       return Response.json(data);

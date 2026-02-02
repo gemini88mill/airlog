@@ -1,4 +1,5 @@
 import { HTTPMethods } from "../../HTTPMethods";
+import type { ResponseError } from "../../lib/responseError";
 import { bootstrapUser } from "./bootstrap.service";
 
 const getBearerToken = (req: Request): string | null => {
@@ -19,26 +20,25 @@ export const bootstrapRoutes = {
     try {
       const token = getBearerToken(req);
       if (!token) {
-        return Response.json({ error: "Unauthorized" }, { status: 401 });
+        const errorPayload: ResponseError = { error: "Unauthorized" };
+        return Response.json(errorPayload, { status: 401 });
       }
 
       const result = await bootstrapUser(token);
 
       const [data, error] = result;
       if (error) {
-        return Response.json(
-          { error: error.message },
-          { status: error.status }
-        );
+        const errorPayload: ResponseError = { error: error.message };
+        return Response.json(errorPayload, { status: error.status });
       }
 
       return Response.json(data);
     } catch (error) {
       console.error("Error bootstrapping user data:", error);
-      return Response.json(
-        { error: "Failed to bootstrap user data" },
-        { status: 500 }
-      );
+      const errorPayload: ResponseError = {
+        error: "Failed to bootstrap user data",
+      };
+      return Response.json(errorPayload, { status: 500 });
     }
   },
 };
