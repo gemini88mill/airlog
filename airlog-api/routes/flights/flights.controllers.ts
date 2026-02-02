@@ -17,14 +17,15 @@ export const flightsRoutes = {
 
           const result = await createFlight(data);
 
-          if ("error" in result) {
+          const [created, error] = result;
+          if (error) {
             return Response.json(
-              { error: result.error },
-              { status: result.status }
+              { error: error.message },
+              { status: error.status }
             );
           }
 
-          return Response.json(result.data, { status: 201 });
+          return Response.json(created, { status: 201 });
         } catch (error) {
           console.error("Error processing flight request:", error);
           return Response.json(
@@ -40,14 +41,15 @@ export const flightsRoutes = {
 
           const result = await listFlights({ scope, circleId });
 
-          if ("error" in result) {
+          const [data, error] = result;
+          if (error) {
             return Response.json(
-              { error: result.error },
-              { status: result.status }
+              { error: error.message },
+              { status: error.status }
             );
           }
 
-          return Response.json(result.data);
+          return Response.json(data);
         } catch (error) {
           console.error("Error fetching flights:", error);
           return Response.json(

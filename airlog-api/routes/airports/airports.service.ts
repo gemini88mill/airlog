@@ -1,18 +1,22 @@
 import { fetchAirports, type AirportRecord } from "./airports.repository";
 
 type ServiceResult =
-  | { data: { airports: AirportRecord[] } }
-  | { error: string };
+  | [{ airports: AirportRecord[] }, null]
+  | [null, { message: string; status: number }];
 
 export const listAirports = async (
   query: string,
   limit: number
 ): Promise<ServiceResult> => {
-  const result = await fetchAirports(query, limit);
+  const [data, error] = await fetchAirports(query, limit);
 
-  if ("error" in result) {
-    return { error: result.error };
+  if (error) {
+    return [null, { message: error, status: 400 }];
   }
 
-  return { data: { airports: result.data } };
+  if (!data) {
+    return [null, { message: "Failed to fetch airports", status: 500 }];
+  }
+
+  return [{ airports: data }, null];
 };

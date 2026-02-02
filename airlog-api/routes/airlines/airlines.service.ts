@@ -1,18 +1,22 @@
 import { fetchAirlines, type AirlineRecord } from "./airlines.repository";
 
 type ServiceResult =
-  | { data: { airlines: AirlineRecord[] } }
-  | { error: string };
+  | [{ airlines: AirlineRecord[] }, null]
+  | [null, { message: string; status: number }];
 
 export const listAirlines = async (
   query: string,
   limit: number
 ): Promise<ServiceResult> => {
-  const result = await fetchAirlines(query, limit);
+  const [data, error] = await fetchAirlines(query, limit);
 
-  if ("error" in result) {
-    return { error: result.error };
+  if (error) {
+    return [null, { message: error, status: 400 }];
   }
 
-  return { data: { airlines: result.data } };
+  if (!data) {
+    return [null, { message: "Failed to fetch airlines", status: 500 }];
+  }
+
+  return [{ airlines: data }, null];
 };

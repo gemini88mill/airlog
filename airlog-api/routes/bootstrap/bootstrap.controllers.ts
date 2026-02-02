@@ -24,14 +24,15 @@ export const bootstrapRoutes = {
 
       const result = await bootstrapUser(token);
 
-      if ("error" in result) {
+      const [data, error] = result;
+      if (error) {
         return Response.json(
-          { error: result.error },
-          { status: result.status }
+          { error: error.message },
+          { status: error.status }
         );
       }
 
-      return Response.json(result.data);
+      return Response.json(data);
     } catch (error) {
       console.error("Error bootstrapping user data:", error);
       return Response.json(

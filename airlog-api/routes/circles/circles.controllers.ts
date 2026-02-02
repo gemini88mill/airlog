@@ -14,17 +14,18 @@ export const circlesRoutes = {
       const data = await req.json().catch(() => ({}));
       const result = await createCircle(data as Record<string, unknown>);
 
-      if ("error" in result) {
+      const [created, error] = result;
+      if (error) {
         return Response.json(
-          { error: result.error },
-          { status: result.status }
+          { error: error.message },
+          { status: error.status }
         );
       }
 
       return Response.json(
         {
           message: "Circle created and owner member added",
-          data: result.data,
+          data: created,
         },
         { status: 201 }
       );
@@ -36,15 +37,16 @@ export const circlesRoutes = {
     if (req.method === HTTPMethods.GET) {
       const result = await listCircles();
 
-      if ("error" in result) {
+      const [circles, error] = result;
+      if (error) {
         return Response.json(
-          { error: result.error },
-          { status: result.status }
+          { error: error.message },
+          { status: error.status }
         );
       }
 
       return Response.json({
-        circles: result.data,
+        circles,
       });
     }
     return new Response("Method not allowed", { status: 405 });
@@ -63,10 +65,11 @@ export const circlesRoutes = {
         data as Record<string, unknown>
       );
 
-      if ("error" in result) {
+      const [member, error] = result;
+      if (error) {
         return Response.json(
-          { error: result.error },
-          { status: result.status }
+          { error: error.message },
+          { status: error.status }
         );
       }
 
@@ -74,7 +77,7 @@ export const circlesRoutes = {
         {
           message: `Member added to circle ${circleId}`,
           circleId,
-          data: result.data,
+          data: member,
         },
         { status: 201 }
       );
@@ -82,16 +85,17 @@ export const circlesRoutes = {
     if (req.method === HTTPMethods.GET) {
       const result = await listCircleMembers(circleId);
 
-      if ("error" in result) {
+      const [members, error] = result;
+      if (error) {
         return Response.json(
-          { error: result.error },
-          { status: result.status }
+          { error: error.message },
+          { status: error.status }
         );
       }
 
       return Response.json({
         circleId,
-        members: result.data,
+        members,
       });
     }
     return new Response("Method not allowed", { status: 405 });

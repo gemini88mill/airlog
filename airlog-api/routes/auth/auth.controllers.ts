@@ -51,14 +51,15 @@ export const authRoutes = {
 
       const result = await loginWithPassword(body.email, body.password);
 
-      if ("error" in result) {
+      const [resultData, resultError] = result;
+      if (resultError) {
         return Response.json(
-          { error: result.error },
-          { status: result.status }
+          { error: resultError.message },
+          { status: resultError.status }
         );
       }
 
-      return Response.json(result.data);
+      return Response.json(resultData);
     } catch (error) {
       console.error("Error processing login request:", error);
       return Response.json(
@@ -85,14 +86,15 @@ export const authRoutes = {
 
       const result = await logoutWithToken(token);
 
-      if ("error" in result) {
+      const [resultData, resultError] = result;
+      if (resultError) {
         return Response.json(
-          { error: result.error },
-          { status: result.status }
+          { error: resultError.message },
+          { status: resultError.status }
         );
       }
 
-      return Response.json(result.data);
+      return Response.json(resultData);
     } catch (error) {
       console.error("Error processing logout request:", error);
       return Response.json(
@@ -116,14 +118,15 @@ export const authRoutes = {
 
       const result = await getSessionForToken(token);
 
-      if ("error" in result) {
+      const [resultData, resultError] = result;
+      if (resultError) {
         return Response.json(
-          { error: result.error },
-          { status: result.status }
+          { error: resultError.message },
+          { status: resultError.status }
         );
       }
 
-      return Response.json(result.data);
+      return Response.json(resultData);
     } catch (error) {
       console.error("Error processing session request:", error);
       return Response.json({ user: null, session: null });

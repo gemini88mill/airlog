@@ -2,16 +2,7 @@ const AVIATIONSTACK_API_KEY = process.env.AVIATIONSTACK_API_KEY;
 const AVIATIONSTACK_BASE_URL =
   process.env.AVIATIONSTACK_BASE_URL || "https://api.aviationstack.com/v1";
 
-interface RepositorySuccess<T> {
-  data: T;
-}
-
-interface RepositoryError {
-  error: string;
-  status: number;
-}
-
-type RepositoryResult<T> = RepositorySuccess<T> | RepositoryError;
+type RepositoryResult<T> = [T, null] | [null, string];
 
 export const fetchAviationStackFlights = async (
   flightIata: string,
@@ -19,7 +10,7 @@ export const fetchAviationStackFlights = async (
   offset: number
 ): Promise<RepositoryResult<unknown>> => {
   if (!AVIATIONSTACK_API_KEY) {
-    return { error: "AviationStack API key is not configured", status: 500 };
+    return [null, "AviationStack API key is not configured"];
   }
 
   const params = new URLSearchParams({
@@ -39,12 +30,9 @@ export const fetchAviationStackFlights = async (
   );
 
   if (!response.ok) {
-    return {
-      error: `AviationStack API error: ${response.status}`,
-      status: 502,
-    };
+    return [null, `AviationStack API error: ${response.status}`];
   }
 
   const data = await response.json();
-  return { data };
+  return [data, null];
 };

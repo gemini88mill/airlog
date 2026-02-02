@@ -5,16 +5,12 @@ import {
 } from "./routes.repository";
 import { upsertRouteByAirlineAndAirports, upsertRoutesBulk } from "./routeUpsert";
 
-interface ServiceSuccess<T> {
-  data: T;
-}
-
 interface ServiceError {
-  error: string;
+  message: string;
   status: number;
 }
 
-type ServiceResult<T> = ServiceSuccess<T> | ServiceError;
+type ServiceResult<T> = [T, null] | [null, ServiceError];
 
 interface RouteLookupResponse {
   data: {
@@ -85,36 +81,33 @@ export const lookupRoute = async (
   const candidates =
     normalized === flightNumber ? [normalized] : [flightNumber, normalized];
 
-  const matchResult = await findRouteByFlightNumbers(candidates);
+  const [matchData, matchError] = await findRouteByFlightNumbers(candidates);
 
-  if ("error" in matchResult) {
-    return { error: matchResult.error, status: 400 };
+  if (matchError && matchError !== "not_found") {
+    return [null, { message: matchError, status: 400 }];
   }
 
-  if (!matchResult.data) {
+  if (!matchData) {
     const parsed = parseFlightNumber(flightNumber);
     if (parsed) {
-      const parsedResult = await findRouteByAirlineAndNumber(
+      const [parsedData, parsedError] = await findRouteByAirlineAndNumber(
         parsed.airlineCode,
         parsed.number
       );
 
-      if ("error" in parsedResult) {
-        return { error: parsedResult.error, status: 400 };
+      if (parsedError && parsedError !== "not_found") {
+        return [null, { message: parsedError, status: 400 }];
       }
 
-      if (parsedResult.data) {
-        return { data: buildLookupResponse(parsedResult.data, normalized) };
+      if (parsedData) {
+        return [buildLookupResponse(parsedData, normalized), null];
       }
     }
 
-    return {
-      error: "Route not found for flight number",
-      status: 404,
-    };
+    return [null, { message: "Route not found for flight number", status: 404 }];
   }
 
-  return { data: buildLookupResponse(matchResult.data, normalized) };
+  return [buildLookupResponse(matchData, normalized), null];
 };
 
 export const upsertRoute = async (
@@ -123,10 +116,10 @@ export const upsertRoute = async (
   const { error } = await upsertRouteByAirlineAndAirports(input);
 
   if (error) {
-    return { error, status: 400 };
+    return [null, { message: error, status: 400 }];
   }
 
-  return { data: { message: "Route upserted" } };
+  return [{ message: "Route upserted" }, null];
 };
 
 export const upsertRoutesInBulk = async (
@@ -134,10 +127,11 @@ export const upsertRoutesInBulk = async (
 ): Promise<ServiceResult<BulkRouteUpsertResult>> => {
   const result = await upsertRoutesBulk(routes);
 
-  return {
-    data: {
+  return [
+    {
       message: "Routes upserted",
       ...result,
     },
-  };
+    null,
+  ];
 };

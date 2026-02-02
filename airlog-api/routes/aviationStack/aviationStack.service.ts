@@ -1,15 +1,11 @@
 import { fetchAviationStackFlights } from "./aviationStack.repository";
 
-interface ServiceSuccess<T> {
-  data: T;
-}
-
 interface ServiceError {
-  error: string;
+  message: string;
   status: number;
 }
 
-type ServiceResult<T> = ServiceSuccess<T> | ServiceError;
+type ServiceResult<T> = [T, null] | [null, ServiceError];
 
 const parsePositiveInt = (value: string | null, fallback: number): number => {
   if (!value) {
@@ -27,11 +23,23 @@ export const getAviationStackFlights = async (
   const limit = parsePositiveInt(limitParam, 100);
   const offset = parsePositiveInt(offsetParam, 0);
 
-  const result = await fetchAviationStackFlights(flightIata, limit, offset);
+  const [data, error] = await fetchAviationStackFlights(
+    flightIata,
+    limit,
+    offset
+  );
 
-  if ("error" in result) {
-    return { error: result.error, status: result.status };
+  if (error) {
+    const status = error.includes("not configured") ? 500 : 502;
+    return [null, { message: error, status }];
   }
 
-  return { data: result.data };
+  if (!data) {
+    return [
+      null,
+      { message: "AviationStack response was empty", status: 502 },
+    ];
+  }
+
+  return [data, null];
 };

@@ -1,27 +1,19 @@
-interface RepositorySuccess<T> {
-  data: T;
-}
-
-interface RepositoryError {
-  error: string;
-}
-
-type RepositoryResult<T> = RepositorySuccess<T> | RepositoryError;
+type RepositoryResult<T> = [T, null] | [null, string];
 
 export const createCircleStub = async (
   payload: Record<string, unknown>
 ): Promise<RepositoryResult<Record<string, unknown>>> => {
-  return { data: payload };
+  return [payload, null];
 };
 
 export const listCirclesStub = async (): Promise<
   RepositoryResult<Array<Record<string, unknown>>>
 > => {
-  return { data: [] };
+  return [[], null];
 };
 
 export const listCircleMembersStub = async (
   circleId: string
 ): Promise<RepositoryResult<Array<Record<string, unknown>>>> => {
-  return { data: [{ circleId }] };
+  return [[{ circleId }], null];
 };

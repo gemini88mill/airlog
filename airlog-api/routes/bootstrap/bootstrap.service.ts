@@ -11,16 +11,12 @@ import {
   type ProfileRecord,
 } from "./bootstrap.repository";
 
-interface ServiceSuccess<T> {
-  data: T;
-}
-
 interface ServiceError {
-  error: string;
+  message: string;
   status: number;
 }
 
-type ServiceResult<T> = ServiceSuccess<T> | ServiceError;
+type ServiceResult<T> = [T, null] | [null, ServiceError];
 
 interface BootstrapMember {
   id: string;
@@ -113,37 +109,48 @@ const buildCircles = (
 export const bootstrapUser = async (
   token: string
 ): Promise<ServiceResult<BootstrapResponse>> => {
-  const userResult = await getUserByToken(token);
+  const [userData, userError] = await getUserByToken(token);
 
-  if ("error" in userResult) {
-    return { error: "Unauthorized", status: 401 };
+  if (userError) {
+    return [null, { message: "Unauthorized", status: 401 }];
   }
 
-  const userId = getUserId(userResult.data);
+  const userId = getUserId(userData);
   if (!userId) {
-    return { error: "Unauthorized", status: 401 };
+    return [null, { message: "Unauthorized", status: 401 }];
   }
 
-  const profileResult = await getProfileByUserId(userId);
-  if ("error" in profileResult) {
-    return { error: profileResult.error, status: 500 };
+  const [profileData, profileError] = await getProfileByUserId(userId);
+  if (profileError && profileError !== "not_found") {
+    return [null, { message: profileError, status: 500 }];
+  }
+  if (!profileData && profileError !== "not_found") {
+    return [null, { message: "Failed to fetch user profile", status: 500 }];
   }
 
-  const membershipsResult = await getCircleMemberships(userId);
-  if ("error" in membershipsResult) {
-    return { error: membershipsResult.error, status: 500 };
+  const [membershipsData, membershipsError] = await getCircleMemberships(
+    userId
+  );
+  if (membershipsError) {
+    return [null, { message: membershipsError, status: 500 }];
+  }
+  if (!membershipsData) {
+    return [
+      null,
+      { message: "Failed to fetch circle memberships", status: 500 },
+    ];
   }
 
-  const circleIds = membershipsResult.data.map((cm) => cm.circle_id);
+  const circleIds = membershipsData.map((cm) => cm.circle_id);
 
   const displayName = buildDisplayName(
-    profileResult.data,
-    getUserEmail(userResult.data)
+    profileError === "not_found" ? null : profileData,
+    getUserEmail(userData)
   );
 
   if (circleIds.length === 0) {
-    return {
-      data: {
+    return [
+      {
         user: {
           id: userId,
           displayName,
@@ -154,41 +161,55 @@ export const bootstrapUser = async (
           canCreateFlights: true,
         },
       },
-    };
+      null,
+    ];
   }
 
-  const circlesResult = await getCirclesByIds(circleIds);
-  if ("error" in circlesResult) {
-    return { error: circlesResult.error, status: 500 };
+  const [circlesData, circlesError] = await getCirclesByIds(circleIds);
+  if (circlesError) {
+    return [null, { message: circlesError, status: 500 }];
+  }
+  if (!circlesData) {
+    return [null, { message: "Failed to fetch circles", status: 500 }];
   }
 
-  const membersResult = await getCircleMembersByCircleIds(circleIds);
-  if ("error" in membersResult) {
-    return { error: membersResult.error, status: 500 };
+  const [membersData, membersError] = await getCircleMembersByCircleIds(
+    circleIds
+  );
+  if (membersError) {
+    return [null, { message: membersError, status: 500 }];
+  }
+  if (!membersData) {
+    return [null, { message: "Failed to fetch circle members", status: 500 }];
   }
 
   const memberUserIds = [
-    ...new Set(membersResult.data.map((member) => member.user_id)),
+    ...new Set(membersData.map((member) => member.user_id)),
   ];
 
-  const profilesResult = await getProfilesByUserIds(memberUserIds);
-  if ("error" in profilesResult) {
-    return { error: profilesResult.error, status: 500 };
+  const [profilesData, profilesError] = await getProfilesByUserIds(
+    memberUserIds
+  );
+  if (profilesError) {
+    return [null, { message: profilesError, status: 500 }];
+  }
+  if (!profilesData) {
+    return [null, { message: "Failed to fetch member profiles", status: 500 }];
   }
 
-  const profileMap = mapProfiles(profilesResult.data);
+  const profileMap = mapProfiles(profilesData);
   const circles = buildCircles(
-    circlesResult.data,
-    membershipsResult.data,
-    membersResult.data,
+    circlesData,
+    membershipsData,
+    membersData,
     userId,
     profileMap
   );
 
   const activeCircleId = circles[0]?.id ?? null;
 
-  return {
-    data: {
+  return [
+    {
       user: {
         id: userId,
         displayName,
@@ -199,5 +220,6 @@ export const bootstrapUser = async (
         canCreateFlights: true,
       },
     },
-  };
+    null,
+  ];
 };

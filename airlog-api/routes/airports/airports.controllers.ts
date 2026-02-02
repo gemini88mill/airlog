@@ -23,11 +23,12 @@ export const airportsRoutes = {
 
       const result = await listAirports(query, limit);
 
-      if ("error" in result) {
-        return Response.json({ error: result.error }, { status: 400 });
+      const [data, error] = result;
+      if (error) {
+        return Response.json({ error: error.message }, { status: error.status });
       }
 
-      return Response.json(result.data);
+      return Response.json(data);
     } catch (error) {
       console.error("Error fetching airports:", error);
       return Response.json(

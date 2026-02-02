@@ -9,9 +9,7 @@ export type AirportRecord = {
   country: string;
 };
 
-type FetchAirportsResult =
-  | { data: AirportRecord[] }
-  | { error: string };
+type FetchAirportsResult = [AirportRecord[], null] | [null, string];
 
 export const fetchAirports = async (
   query: string,
@@ -32,8 +30,8 @@ export const fetchAirports = async (
   const { data, error } = await supabaseQuery;
 
   if (error) {
-    return { error: error.message };
+    return [null, error.message];
   }
 
-  return { data: data || [] };
+  return [data || [], null];
 };

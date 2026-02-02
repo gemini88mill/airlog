@@ -4,56 +4,64 @@ import {
   listCirclesStub,
 } from "./circles.repository";
 
-interface ServiceSuccess<T> {
-  data: T;
-}
-
 interface ServiceError {
-  error: string;
+  message: string;
   status: number;
 }
 
-type ServiceResult<T> = ServiceSuccess<T> | ServiceError;
+type ServiceResult<T> = [T, null] | [null, ServiceError];
 
 export const createCircle = async (
   payload: Record<string, unknown>
 ): Promise<ServiceResult<Record<string, unknown>>> => {
-  const result = await createCircleStub(payload);
+  const [data, error] = await createCircleStub(payload);
 
-  if ("error" in result) {
-    return { error: result.error, status: 400 };
+  if (error) {
+    return [null, { message: error, status: 400 }];
   }
 
-  return { data: result.data };
+  if (!data) {
+    return [null, { message: "Failed to create circle", status: 400 }];
+  }
+
+  return [data, null];
 };
 
 export const listCircles = async (): Promise<
   ServiceResult<Array<Record<string, unknown>>>
 > => {
-  const result = await listCirclesStub();
+  const [data, error] = await listCirclesStub();
 
-  if ("error" in result) {
-    return { error: result.error, status: 400 };
+  if (error) {
+    return [null, { message: error, status: 400 }];
   }
 
-  return { data: result.data };
+  if (!data) {
+    return [null, { message: "Failed to fetch circles", status: 400 }];
+  }
+
+  return [data, null];
 };
 
 export const addCircleMember = async (
   circleId: string,
   payload: Record<string, unknown>
 ): Promise<ServiceResult<Record<string, unknown>>> => {
-  return { data: { circleId, ...payload } };
+  return [{ circleId, ...payload }, null];
 };
 
 export const listCircleMembers = async (
   circleId: string
 ): Promise<ServiceResult<Array<Record<string, unknown>>>> => {
-  const result = await listCircleMembersStub(circleId);
+  const [data, error] = await listCircleMembersStub(circleId);
 
-  if ("error" in result) {
-    return { error: result.error, status: 400 };
+  if (error) {
+    return [null, { message: error, status: 400 }];
   }
 
-  return { data: result.data };
+  if (!data) {
+    return [null, { message: "Failed to fetch circle members", status: 400 }];
+  }
+
+  return [data, null];
 };

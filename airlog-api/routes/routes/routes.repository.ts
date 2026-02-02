@@ -7,15 +7,7 @@ export interface RouteMatchRecord {
   flight_num: string | null;
 }
 
-interface RepositorySuccess<T> {
-  data: T;
-}
-
-interface RepositoryError {
-  error: string;
-}
-
-type RepositoryResult<T> = RepositorySuccess<T> | RepositoryError;
+type RepositoryResult<T> = [T, null] | [null, string];
 
 export const findRouteByFlightNumbers = async (
   candidates: string[]
@@ -29,10 +21,14 @@ export const findRouteByFlightNumbers = async (
     .maybeSingle();
 
   if (error) {
-    return { error: error.message };
+    return [null, error.message];
   }
 
-  return { data: data || null };
+  if (!data) {
+    return [null, "not_found"];
+  }
+
+  return [data, null];
 };
 
 export const findRouteByAirlineAndNumber = async (
@@ -49,8 +45,12 @@ export const findRouteByAirlineAndNumber = async (
     .maybeSingle();
 
   if (error) {
-    return { error: error.message };
+    return [null, error.message];
   }
 
-  return { data: data || null };
+  if (!data) {
+    return [null, "not_found"];
+  }
+
+  return [data, null];
 };

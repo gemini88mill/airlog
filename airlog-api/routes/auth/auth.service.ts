@@ -5,50 +5,50 @@ import {
   type AuthSessionResult,
 } from "./auth.repository";
 
-interface ServiceSuccess<T> {
-  data: T;
-}
-
 interface ServiceError {
-  error: string;
+  message: string;
   status: number;
 }
 
-type ServiceResult<T> = ServiceSuccess<T> | ServiceError;
+type ServiceResult<T> = [T, null] | [null, ServiceError];
 
 export const loginWithPassword = async (
   email: string,
   password: string
 ): Promise<ServiceResult<AuthLoginResult>> => {
-  const result = await signInWithPassword(email, password);
+  const [data, error] = await signInWithPassword(email, password);
 
-  if ("error" in result) {
-    return { error: result.error, status: 401 };
+  if (error) {
+    return [null, { message: error, status: 401 }];
   }
 
-  return { data: result.data };
+  if (!data) {
+    return [null, { message: "No session created", status: 401 }];
+  }
+
+  return [data, null];
 };
 
 export const logoutWithToken = async (
   token: string
 ): Promise<ServiceResult<{ message: string }>> => {
-  const result = await getUserByToken(token);
+  const [, error] = await getUserByToken(token);
 
-  if ("error" in result) {
-    return { data: { message: "Logged out successfully" } };
+  if (error) {
+    return [{ message: "Logged out successfully" }, null];
   }
 
-  return { data: { message: "Logged out successfully" } };
+  return [{ message: "Logged out successfully" }, null];
 };
 
 export const getSessionForToken = async (
   token: string
 ): Promise<ServiceResult<AuthSessionResult>> => {
-  const result = await getUserByToken(token);
+  const [data, error] = await getUserByToken(token);
 
-  if ("error" in result) {
-    return { data: { user: null, session: null } };
+  if (error) {
+    return [{ user: null, session: null }, null];
   }
 
-  return { data: { user: result.data, session: { access_token: token } } };
+  return [{ user: data, session: { access_token: token } }, null];
 };

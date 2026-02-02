@@ -23,14 +23,15 @@ export const routesRoutes = {
 
       const result = await lookupRoute(flightNumber);
 
-      if ("error" in result) {
+      const [resultData, resultError] = result;
+      if (resultError) {
         return Response.json(
-          { error: result.error },
-          { status: result.status }
+          { error: resultError.message },
+          { status: resultError.status }
         );
       }
 
-      return Response.json(result.data);
+      return Response.json(resultData);
     } catch (error) {
       console.error("Error looking up route:", error);
       return Response.json(
@@ -73,14 +74,15 @@ export const routesRoutes = {
         flightNumber,
       });
 
-      if ("error" in result) {
+      const [resultData, resultError] = result;
+      if (resultError) {
         return Response.json(
-          { error: result.error },
-          { status: result.status }
+          { error: resultError.message },
+          { status: resultError.status }
         );
       }
 
-      return Response.json(result.data);
+      return Response.json(resultData);
     } catch (error) {
       console.error("Error upserting route:", error);
       return Response.json({ error: "Failed to upsert route" }, { status: 500 });
@@ -135,14 +137,15 @@ export const routesRoutes = {
 
       const result = await upsertRoutesInBulk(normalizedRoutes);
 
-      if ("error" in result) {
+      const [resultData, resultError] = result;
+      if (resultError) {
         return Response.json(
-          { error: result.error },
-          { status: result.status }
+          { error: resultError.message },
+          { status: resultError.status }
         );
       }
 
-      return Response.json(result.data);
+      return Response.json(resultData);
     } catch (error) {
       console.error("Error bulk upserting routes:", error);
       return Response.json(

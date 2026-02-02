@@ -1,17 +1,17 @@
 import type { TablesInsert } from "../../database.types";
 import { upsertRouteByAirlineAndAirports } from "../routes/routeUpsert";
-import { fetchFlights, insertFlight, type FlightsQueryFilters } from "./flights.repository";
-
-interface ServiceSuccess<T> {
-  data: T;
-}
+import {
+  fetchFlights,
+  insertFlight,
+  type FlightsQueryFilters,
+} from "./flights.repository";
 
 interface ServiceError {
-  error: string;
+  message: string;
   status: number;
 }
 
-type ServiceResult<T> = ServiceSuccess<T> | ServiceError;
+type ServiceResult<T> = [T, null] | [null, ServiceError];
 
 interface CreateFlightResponse {
   message: string;
@@ -51,21 +51,27 @@ export const createFlight = async (
     !isString(payload.flight_number) ||
     !isString(payload.user_id)
   ) {
-    return {
-      error: "Missing required fields: flight_date, flight_number, user_id",
-      status: 400,
-    };
+    return [
+      null,
+      {
+        message: "Missing required fields: flight_date, flight_number, user_id",
+        status: 400,
+      },
+    ];
   }
 
   const rawFlightNumber = payload.flight_number;
   const flightNumberNumeric = extractFlightNumber(rawFlightNumber);
 
   if (flightNumberNumeric === null) {
-    return {
-      error:
-        "Invalid flight number. Could not extract a valid numeric flight number.",
-      status: 400,
-    };
+    return [
+      null,
+      {
+        message:
+          "Invalid flight number. Could not extract a valid numeric flight number.",
+        status: 400,
+      },
+    ];
   }
 
   const flightData: TablesInsert<"flights"> = {
@@ -83,10 +89,13 @@ export const createFlight = async (
     visibility: (payload.visibility as "private" | "shared") || "private",
   };
 
-  const insertResult = await insertFlight(flightData);
+  const [insertData, insertError] = await insertFlight(flightData);
 
-  if ("error" in insertResult) {
-    return { error: insertResult.error, status: 400 };
+  if (insertError) {
+    return [null, { message: insertError, status: 400 }];
+  }
+  if (!insertData) {
+    return [null, { message: "Failed to create flight", status: 400 }];
   }
 
   if (
@@ -106,28 +115,33 @@ export const createFlight = async (
     }
   }
 
-  return {
-    data: {
+  return [
+    {
       message: "Flight added",
-      data: insertResult.data,
+      data: insertData,
     },
-  };
+    null,
+  ];
 };
 
 export const listFlights = async (
   filters: FlightsQueryFilters
 ): Promise<ServiceResult<FetchFlightsResponse>> => {
-  const result = await fetchFlights(filters);
+  const [data, error] = await fetchFlights(filters);
 
-  if ("error" in result) {
-    return { error: result.error, status: 400 };
+  if (error) {
+    return [null, { message: error, status: 400 }];
+  }
+  if (!data) {
+    return [null, { message: "Failed to fetch flights", status: 400 }];
   }
 
-  return {
-    data: {
+  return [
+    {
       scope: filters.scope,
       circleId: filters.circleId,
-      flights: result.data,
+      flights: data,
     },
-  };
+    null,
+  ];
 };

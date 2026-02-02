@@ -22,15 +22,7 @@ export interface ProfileRecord {
   display_name: string | null;
 }
 
-interface RepositorySuccess<T> {
-  data: T;
-}
-
-interface RepositoryError {
-  error: string;
-}
-
-type RepositoryResult<T> = RepositorySuccess<T> | RepositoryError;
+type RepositoryResult<T> = [T, null] | [null, string];
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -48,14 +40,14 @@ export const getUserByToken = async (
   const { data, error } = await supabase.auth.getUser(token);
 
   if (error) {
-    return { error: error.message };
+    return [null, error.message];
   }
 
   if (!data.user) {
-    return { error: "User not found" };
+    return [null, "User not found"];
   }
 
-  return { data: data.user };
+  return [data.user, null];
 };
 
 export const getProfileByUserId = async (
@@ -68,14 +60,14 @@ export const getProfileByUserId = async (
     .single();
 
   if (error && !isNotFoundError(error)) {
-    return { error: "Failed to fetch user profile" };
+    return [null, "Failed to fetch user profile"];
   }
 
   if (error && isNotFoundError(error)) {
-    return { data: null };
+    return [null, "not_found"];
   }
 
-  return { data: data || null };
+  return [data || null, null];
 };
 
 export const getCircleMemberships = async (
@@ -87,10 +79,10 @@ export const getCircleMemberships = async (
     .eq("user_id", userId);
 
   if (error) {
-    return { error: "Failed to fetch circle memberships" };
+    return [null, "Failed to fetch circle memberships"];
   }
 
-  return { data: data || [] };
+  return [data || [], null];
 };
 
 export const getCirclesByIds = async (
@@ -102,10 +94,10 @@ export const getCirclesByIds = async (
     .in("id", circleIds);
 
   if (error) {
-    return { error: "Failed to fetch circles" };
+    return [null, "Failed to fetch circles"];
   }
 
-  return { data: data || [] };
+  return [data || [], null];
 };
 
 export const getCircleMembersByCircleIds = async (
@@ -117,10 +109,10 @@ export const getCircleMembersByCircleIds = async (
     .in("circle_id", circleIds);
 
   if (error) {
-    return { error: "Failed to fetch circle members" };
+    return [null, "Failed to fetch circle members"];
   }
 
-  return { data: data || [] };
+  return [data || [], null];
 };
 
 export const getProfilesByUserIds = async (
@@ -132,8 +124,8 @@ export const getProfilesByUserIds = async (
     .in("user_id", userIds);
 
   if (error) {
-    return { error: "Failed to fetch member profiles" };
+    return [null, "Failed to fetch member profiles"];
   }
 
-  return { data: data || [] };
+  return [data || [], null];
 };

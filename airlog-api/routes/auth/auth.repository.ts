@@ -16,15 +16,7 @@ export interface AuthSessionResult {
   session: { access_token: string } | null;
 }
 
-interface RepositorySuccess<T> {
-  data: T;
-}
-
-interface RepositoryError {
-  error: string;
-}
-
-type RepositoryResult<T> = RepositorySuccess<T> | RepositoryError;
+type RepositoryResult<T> = [T, null] | [null, string];
 
 export const signInWithPassword = async (
   email: string,
@@ -36,15 +28,15 @@ export const signInWithPassword = async (
   });
 
   if (error) {
-    return { error: error.message };
+    return [null, error.message];
   }
 
   if (!authData.session) {
-    return { error: "No session created" };
+    return [null, "No session created"];
   }
 
-  return {
-    data: {
+  return [
+    {
       user: authData.user,
       session: {
         access_token: authData.session.access_token,
@@ -52,7 +44,8 @@ export const signInWithPassword = async (
         expires_at: authData.session.expires_at ?? null,
       },
     },
-  };
+    null,
+  ];
 };
 
 export const getUserByToken = async (
@@ -61,12 +54,12 @@ export const getUserByToken = async (
   const { data, error } = await supabase.auth.getUser(token);
 
   if (error) {
-    return { error: error.message };
+    return [null, error.message];
   }
 
   if (!data.user) {
-    return { error: "User not found" };
+    return [null, "User not found"];
   }
 
-  return { data: data.user };
+  return [data.user, null];
 };

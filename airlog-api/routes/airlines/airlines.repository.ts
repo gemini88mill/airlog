@@ -7,9 +7,7 @@ export type AirlineRecord = {
   icao: string | null;
 };
 
-type FetchAirlinesResult =
-  | { data: AirlineRecord[] }
-  | { error: string };
+type FetchAirlinesResult = [AirlineRecord[], null] | [null, string];
 
 export const fetchAirlines = async (
   query: string,
@@ -31,8 +29,8 @@ export const fetchAirlines = async (
   const { data, error } = await supabaseQuery;
 
   if (error) {
-    return { error: error.message };
+    return [null, error.message];
   }
 
-  return { data: data || [] };
+  return [data || [], null];
 };

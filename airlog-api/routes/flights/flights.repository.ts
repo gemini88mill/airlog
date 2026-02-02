@@ -6,15 +6,7 @@ export interface FlightsQueryFilters {
   circleId: string | null;
 }
 
-interface RepositorySuccess<T> {
-  data: T;
-}
-
-interface RepositoryError {
-  error: string;
-}
-
-type RepositoryResult<T> = RepositorySuccess<T> | RepositoryError;
+type RepositoryResult<T> = [T, null] | [null, string];
 
 export const insertFlight = async (
   flightData: TablesInsert<"flights">
@@ -26,10 +18,10 @@ export const insertFlight = async (
     .single();
 
   if (error) {
-    return { error: error.message };
+    return [null, error.message];
   }
 
-  return { data: data as Record<string, unknown> };
+  return [data as Record<string, unknown>, null];
 };
 
 export const fetchFlights = async (
@@ -50,8 +42,8 @@ export const fetchFlights = async (
   });
 
   if (error) {
-    return { error: error.message };
+    return [null, error.message];
   }
 
-  return { data: (data || []) as Array<Record<string, unknown>> };
+  return [(data || []) as Array<Record<string, unknown>>, null];
 };
