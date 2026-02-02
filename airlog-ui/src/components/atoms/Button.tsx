@@ -1,7 +1,7 @@
 type ButtonProps = {
   children: React.ReactNode;
   onClick?: () => void;
-  variant?: 'primary' | 'secondary' | 'danger';
+  variant?: 'primary' | 'secondary' | 'danger' | 'link';
   disabled?: boolean;
   type?: 'button' | 'submit' | 'reset';
   fullWidth?: boolean;
@@ -21,6 +21,7 @@ export const Button = ({
     primary: 'bg-primary-500 hover:bg-primary-600 text-white',
     secondary: 'bg-gray-200 hover:bg-gray-300 text-gray-800',
     danger: 'bg-red-600 hover:bg-red-700 text-white',
+    link: 'bg-transparent text-gray-600 hover:text-gray-800 underline p-0',
   };
 
   const isDisabled = disabled || loading;

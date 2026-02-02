@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Field, Label } from "@headlessui/react";
 import { FlightCombobox } from "../molecules/FlightCombobox";
 import { AirlineCombobox, type Airline } from "../molecules/AirlineCombobox";
@@ -271,10 +271,10 @@ export const AddFlightForm = ({
     }
   };
 
-  const handleNoResults = (searched: boolean, query: string) => {
+  const handleNoResults = useCallback((searched: boolean, query: string) => {
     setHasSearched(searched);
     setSearchQuery(query);
-  };
+  }, []);
 
   const handleManualEntryClick = () => {
     setShowManualEntry(true);
@@ -306,24 +306,24 @@ export const AddFlightForm = ({
                 <p className="text-sm text-yellow-800 mb-2">
                   Couldn't find your flight? You can enter the details manually.
                 </p>
-                <button
+                <Button
                   type="button"
+                  variant="secondary"
                   onClick={handleManualEntryClick}
-                  className="text-sm font-medium text-yellow-900 hover:text-yellow-700 underline"
                 >
                   Enter flight details manually
-                </button>
+                </Button>
               </div>
             )}
             {!hasSearched && (
               <div className="mt-3">
-                <button
+                <Button
                   type="button"
+                  variant="link"
                   onClick={handleManualEntryClick}
-                  className="text-sm text-gray-600 hover:text-gray-800 underline"
                 >
                   Or enter flight details manually
-                </button>
+                </Button>
               </div>
             )}
           </Field>
@@ -335,16 +335,16 @@ export const AddFlightForm = ({
               <h3 className="text-lg font-semibold text-gray-900">
                 Manual Entry
               </h3>
-              <button
+              <Button
                 type="button"
+                variant="secondary"
                 onClick={() => {
                   setShowManualEntry(false);
                   setSelectedFlight(null);
                 }}
-                className="text-sm text-gray-600 hover:text-gray-800 underline"
               >
                 Search instead
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -369,28 +369,28 @@ export const AddFlightForm = ({
           disabled={loading}
         />
 
-        <div className="grid grid-cols-2 gap-4">
-          <AirlineCombobox
-            value={selectedAirline}
-            onChange={handleAirlineChange}
-            disabled={loading}
-            label="Airline"
-          />
+        <AirlineCombobox
+          value={selectedAirline}
+          onChange={handleAirlineChange}
+          disabled={loading}
+          label="Airline"
+        />
 
+        <div className="grid grid-cols-2 gap-4">
           <AirportCombobox
             value={selectedOriginAirport}
             onChange={handleOriginAirportChange}
             disabled={loading}
             label="Origin Airport"
           />
-        </div>
 
-        <AirportCombobox
-          value={selectedDestinationAirport}
-          onChange={handleDestinationAirportChange}
-          disabled={loading}
-          label="Destination Airport"
-        />
+          <AirportCombobox
+            value={selectedDestinationAirport}
+            onChange={handleDestinationAirportChange}
+            disabled={loading}
+            label="Destination Airport"
+          />
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <SelectField
             id="role"
