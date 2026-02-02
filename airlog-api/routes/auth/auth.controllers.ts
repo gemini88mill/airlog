@@ -35,7 +35,10 @@ export const authRoutes = {
       const data = await req.json().catch(() => ({}));
 
       if (!isRecord(data)) {
-        const errorPayload: ResponseError = { error: "Invalid request body" };
+        const errorPayload: ResponseError = {
+          error: "Invalid request body",
+          status: 400,
+        };
         return Response.json(errorPayload, { status: 400 });
       }
 
@@ -44,6 +47,7 @@ export const authRoutes = {
       if (!isString(body.email) || !isString(body.password)) {
         const errorPayload: ResponseError = {
           error: "Missing required fields: email, password",
+          status: 400,
         };
         return Response.json(errorPayload, { status: 400 });
       }
@@ -52,7 +56,10 @@ export const authRoutes = {
 
       const [resultData, resultError] = result;
       if (resultError) {
-        const errorPayload: ResponseError = { error: resultError.message };
+        const errorPayload: ResponseError = {
+          error: resultError.message,
+          status: resultError.status,
+        };
         return Response.json(errorPayload, { status: resultError.status });
       }
 
@@ -61,6 +68,7 @@ export const authRoutes = {
       console.error("Error processing login request:", error);
       const errorPayload: ResponseError = {
         error: "Failed to process login request",
+        status: 500,
       };
       return Response.json(errorPayload, { status: 500 });
     }
@@ -77,6 +85,7 @@ export const authRoutes = {
       if (!token) {
         const errorPayload: ResponseError = {
           error: "Missing or invalid authorization header",
+          status: 401,
         };
         return Response.json(errorPayload, { status: 401 });
       }
@@ -85,7 +94,10 @@ export const authRoutes = {
 
       const [resultData, resultError] = result;
       if (resultError) {
-        const errorPayload: ResponseError = { error: resultError.message };
+        const errorPayload: ResponseError = {
+          error: resultError.message,
+          status: resultError.status,
+        };
         return Response.json(errorPayload, { status: resultError.status });
       }
 
@@ -94,6 +106,7 @@ export const authRoutes = {
       console.error("Error processing logout request:", error);
       const errorPayload: ResponseError = {
         error: "Failed to process logout request",
+        status: 500,
       };
       return Response.json(errorPayload, { status: 500 });
     }
@@ -115,7 +128,10 @@ export const authRoutes = {
 
       const [resultData, resultError] = result;
       if (resultError) {
-        const errorPayload: ResponseError = { error: resultError.message };
+        const errorPayload: ResponseError = {
+          error: resultError.message,
+          status: resultError.status,
+        };
         return Response.json(errorPayload, { status: resultError.status });
       }
 

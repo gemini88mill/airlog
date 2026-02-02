@@ -20,7 +20,10 @@ export const bootstrapRoutes = {
     try {
       const token = getBearerToken(req);
       if (!token) {
-        const errorPayload: ResponseError = { error: "Unauthorized" };
+        const errorPayload: ResponseError = {
+          error: "Unauthorized",
+          status: 401,
+        };
         return Response.json(errorPayload, { status: 401 });
       }
 
@@ -28,7 +31,10 @@ export const bootstrapRoutes = {
 
       const [data, error] = result;
       if (error) {
-        const errorPayload: ResponseError = { error: error.message };
+        const errorPayload: ResponseError = {
+          error: error.message,
+          status: error.status,
+        };
         return Response.json(errorPayload, { status: error.status });
       }
 
@@ -37,6 +43,7 @@ export const bootstrapRoutes = {
       console.error("Error bootstrapping user data:", error);
       const errorPayload: ResponseError = {
         error: "Failed to bootstrap user data",
+        status: 500,
       };
       return Response.json(errorPayload, { status: 500 });
     }

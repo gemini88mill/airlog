@@ -17,7 +17,10 @@ export const circlesRoutes = {
 
       const [created, error] = result;
       if (error) {
-        const errorPayload: ResponseError = { error: error.message };
+        const errorPayload: ResponseError = {
+          error: error.message,
+          status: error.status,
+        };
         return Response.json(errorPayload, { status: error.status });
       }
 
@@ -38,7 +41,10 @@ export const circlesRoutes = {
 
       const [circles, error] = result;
       if (error) {
-        const errorPayload: ResponseError = { error: error.message };
+        const errorPayload: ResponseError = {
+          error: error.message,
+          status: error.status,
+        };
         return Response.json(errorPayload, { status: error.status });
       }
 
@@ -64,7 +70,10 @@ export const circlesRoutes = {
 
       const [member, error] = result;
       if (error) {
-        const errorPayload: ResponseError = { error: error.message };
+        const errorPayload: ResponseError = {
+          error: error.message,
+          status: error.status,
+        };
         return Response.json(errorPayload, { status: error.status });
       }
 
@@ -82,7 +91,10 @@ export const circlesRoutes = {
 
       const [members, error] = result;
       if (error) {
-        const errorPayload: ResponseError = { error: error.message };
+        const errorPayload: ResponseError = {
+          error: error.message,
+          status: error.status,
+        };
         return Response.json(errorPayload, { status: error.status });
       }
 

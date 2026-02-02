@@ -26,7 +26,10 @@ export const airportsRoutes = {
 
       const [data, error] = result;
       if (error) {
-        const errorPayload: ResponseError = { error: error.message };
+        const errorPayload: ResponseError = {
+          error: error.message,
+          status: error.status,
+        };
         return Response.json(errorPayload, { status: error.status });
       }
 

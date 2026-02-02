@@ -26,7 +26,10 @@ export const routesRoutes = {
 
       const [resultData, resultError] = result;
       if (resultError) {
-        const errorPayload: ResponseError = { error: resultError.message };
+        const errorPayload: ResponseError = {
+          error: resultError.message,
+          status: resultError.status,
+        };
         return Response.json(errorPayload, { status: resultError.status });
       }
 
@@ -75,14 +78,20 @@ export const routesRoutes = {
 
       const [resultData, resultError] = result;
       if (resultError) {
-        const errorPayload: ResponseError = { error: resultError.message };
+        const errorPayload: ResponseError = {
+          error: resultError.message,
+          status: resultError.status,
+        };
         return Response.json(errorPayload, { status: resultError.status });
       }
 
       return Response.json(resultData);
     } catch (error) {
       console.error("Error upserting route:", error);
-      const errorPayload: ResponseError = { error: "Failed to upsert route" };
+      const errorPayload: ResponseError = {
+        error: "Failed to upsert route",
+        status: 500,
+      };
       return Response.json(errorPayload, { status: 500 });
     }
   },
@@ -137,7 +146,10 @@ export const routesRoutes = {
 
       const [resultData, resultError] = result;
       if (resultError) {
-        const errorPayload: ResponseError = { error: resultError.message };
+        const errorPayload: ResponseError = {
+          error: resultError.message,
+          status: resultError.status,
+        };
         return Response.json(errorPayload, { status: resultError.status });
       }
 

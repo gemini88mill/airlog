@@ -20,7 +20,10 @@ export const flightsRoutes = {
 
           const [created, error] = result;
           if (error) {
-            const errorPayload: ResponseError = { error: error.message };
+            const errorPayload: ResponseError = {
+              error: error.message,
+              status: error.status,
+            };
             return Response.json(errorPayload, { status: error.status });
           }
 
@@ -42,7 +45,10 @@ export const flightsRoutes = {
 
           const [data, error] = result;
           if (error) {
-            const errorPayload: ResponseError = { error: error.message };
+            const errorPayload: ResponseError = {
+              error: error.message,
+              status: error.status,
+            };
             return Response.json(errorPayload, { status: error.status });
           }
 
